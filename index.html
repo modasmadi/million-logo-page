@@ -1,0 +1,879 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Million Logo Page - First Arabic Digital Advertising Museum</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800;900&family=Poppins:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --font-en: 'Poppins', sans-serif;
+            --font-ar: 'Tajawal', sans-serif;
+        }
+        body { font-family: var(--font-en); }
+        body[dir="rtl"] { font-family: var(--font-ar); }
+        
+        .grid-cell {
+            width: 10px;
+            height: 10px;
+            transition: all 0.2s;
+        }
+        .grid-cell:hover {
+            transform: scale(3);
+            z-index: 100;
+            box-shadow: 0 0 20px rgba(0,0,0,0.5);
+        }
+        .grid-cell.sold { cursor: pointer; }
+        .grid-cell.available {
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            cursor: pointer;
+        }
+        .grid-cell.available:hover {
+            background: linear-gradient(135deg, #e94560 0%, #ff6b6b 100%);
+        }
+        .glow {
+            animation: glow 2s ease-in-out infinite alternate;
+        }
+        @keyframes glow {
+            from { box-shadow: 0 0 20px #e94560, 0 0 40px #e94560; }
+            to { box-shadow: 0 0 30px #ff6b6b, 0 0 60px #ff6b6b; }
+        }
+        .counter-gradient {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        .hero-bg {
+            background: linear-gradient(135deg, #0f0c29 0%, #302b63 50%, #24243e 100%);
+        }
+        .scroll-smooth { scroll-behavior: smooth; }
+        .pioneer-badge {
+            background: linear-gradient(135deg, #f5af19 0%, #f12711 100%);
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+        .copy-btn:active { transform: scale(0.95); }
+        .payment-card {
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            border: 1px solid rgba(233, 69, 96, 0.3);
+        }
+        .payment-card:hover {
+            border-color: rgba(233, 69, 96, 0.6);
+        }
+    </style>
+</head>
+<body class="bg-gray-900 text-white scroll-smooth">
+    <!-- Language Toggle & Navigation -->
+    <nav class="fixed top-0 w-full bg-gray-900/95 backdrop-blur-sm z-50 border-b border-gray-800">
+        <div class="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 bg-gradient-to-br from-pink-500 to-purple-600 rounded-lg flex items-center justify-center text-xl font-bold">M</div>
+                <span class="text-xl font-bold hidden sm:block" data-en="Million Logo" data-ar="الصفحة المليون">Million Logo</span>
+            </div>
+            <div class="hidden md:flex gap-6">
+                <a href="#home" class="hover:text-pink-400 transition" data-en="Home" data-ar="الرئيسية">Home</a>
+                <a href="#grid" class="hover:text-pink-400 transition" data-en="Grid" data-ar="الشبكة">Grid</a>
+                <a href="#how" class="hover:text-pink-400 transition" data-en="How to Buy" data-ar="كيف تشتري">How to Buy</a>
+                <a href="#payment" class="hover:text-pink-400 transition" data-en="Payment" data-ar="الدفع">Payment</a>
+                <a href="#charter" class="hover:text-pink-400 transition" data-en="Charter" data-ar="الميثاق">Charter</a>
+            </div>
+            <div class="flex items-center gap-3">
+                <!-- Language Toggle -->
+                <button onclick="toggleLanguage()" class="flex items-center gap-2 bg-gray-800 px-3 py-2 rounded-lg hover:bg-gray-700 transition text-sm">
+                    <span id="langIcon">🇬🇧</span>
+                    <span id="langText">EN</span>
+                </button>
+                <button onclick="openBuyModal()" class="bg-gradient-to-r from-pink-500 to-purple-600 px-4 sm:px-6 py-2 rounded-full font-bold hover:opacity-90 transition glow text-sm sm:text-base">
+                    <span data-en="Buy Now" data-ar="احجز الآن">Buy Now</span>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section id="home" class="hero-bg min-h-screen flex items-center justify-center pt-20">
+        <div class="max-w-6xl mx-auto px-4 text-center">
+            <div class="mb-8">
+                <span class="bg-pink-500/20 text-pink-400 px-4 py-2 rounded-full text-sm font-bold">
+                    🚀 <span data-en="First Arabic Digital Advertising Museum" data-ar="أول متحف إعلاني رقمي عربي">First Arabic Digital Advertising Museum</span>
+                </span>
+            </div>
+            <h1 class="text-4xl sm:text-5xl md:text-7xl font-black mb-6 leading-tight">
+                <span data-en="The Million" data-ar="الصفحة">The Million</span>
+                <span class="text-transparent bg-clip-text bg-gradient-to-r from-pink-500 to-purple-500" data-en="Logo Page" data-ar="المليون شعار">Logo Page</span>
+            </h1>
+            <p class="text-lg sm:text-xl md:text-2xl text-gray-300 mb-8 max-w-3xl mx-auto">
+                <span data-en="One million cells. 1 JOD per cell. Digital history that lasts forever." data-ar="مليون خانة. دينار واحد للخانة. تاريخ رقمي لا يُمحى.">One million cells. 1 JOD per cell. Digital history that lasts forever.</span>
+                <br>
+                <span class="text-pink-400" data-en="Be part of history before it fills up!" data-ar="كن جزءاً من التاريخ قبل أن يمتلئ!">Be part of history before it fills up!</span>
+            </p>
+            
+            <!-- Live Counter -->
+            <div class="flex flex-wrap justify-center gap-4 sm:gap-6 mb-12">
+                <div class="counter-gradient px-6 sm:px-8 py-4 sm:py-6 rounded-2xl text-center min-w-[120px] sm:min-w-[150px]">
+                    <div class="text-3xl sm:text-4xl font-black" id="soldCount">247</div>
+                    <div class="text-xs sm:text-sm opacity-80" data-en="Cells Sold" data-ar="خانة مباعة">Cells Sold</div>
+                </div>
+                <div class="bg-gray-800 px-6 sm:px-8 py-4 sm:py-6 rounded-2xl text-center min-w-[120px] sm:min-w-[150px]">
+                    <div class="text-3xl sm:text-4xl font-black text-green-400" id="availableCount">999,753</div>
+                    <div class="text-xs sm:text-sm opacity-80" data-en="Available" data-ar="متاحة">Available</div>
+                </div>
+                <div class="bg-gray-800 px-6 sm:px-8 py-4 sm:py-6 rounded-2xl text-center min-w-[120px] sm:min-w-[150px]">
+                    <div class="text-3xl sm:text-4xl font-black text-yellow-400">1 JOD</div>
+                    <div class="text-xs sm:text-sm opacity-80" data-en="Fixed Forever" data-ar="سعر ثابت للأبد">Fixed Forever</div>
+                </div>
+            </div>
+
+            <div class="flex flex-wrap justify-center gap-4">
+                <button onclick="openBuyModal()" class="bg-gradient-to-r from-pink-500 to-purple-600 px-8 sm:px-10 py-3 sm:py-4 rounded-full font-bold text-base sm:text-lg hover:opacity-90 transition transform hover:scale-105 glow">
+                    🎯 <span data-en="Claim Your Cell Now" data-ar="احجز خانتك الآن">Claim Your Cell Now</span>
+                </button>
+                <a href="#grid" class="border-2 border-gray-600 px-8 sm:px-10 py-3 sm:py-4 rounded-full font-bold text-base sm:text-lg hover:border-pink-500 transition">
+                    <span data-en="Explore Grid" data-ar="استكشف الشبكة">Explore Grid</span>
+                </a>
+            </div>
+
+            <!-- Scroll indicator -->
+            <div class="mt-16 animate-bounce">
+                <svg class="w-6 h-6 mx-auto text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3"></path>
+                </svg>
+            </div>
+        </div>
+    </section>
+
+    <!-- Story Section -->
+    <section class="py-20 bg-gray-800/50">
+        <div class="max-w-6xl mx-auto px-4">
+            <div class="grid md:grid-cols-2 gap-12 items-center">
+                <div>
+                    <h2 class="text-3xl sm:text-4xl font-black mb-6">
+                        <span data-en="The Story Behind 📖" data-ar="القصة وراء الفكرة 📖">The Story Behind 📖</span>
+                    </h2>
+                    <p class="text-gray-300 text-lg leading-relaxed mb-6" data-en="In 2005, a young man named Alex Tew created 'The Million Dollar Homepage' and sold one million pixels at $1 each. He made a million dollars!" data-ar="في عام 2005، شاب يدعى Alex Tew أنشأ موقع 'The Million Dollar Homepage' وباع مليون بكسل بدولار واحد لكل بكسل. ربح مليون دولار!">
+                        In 2005, a young man named Alex Tew created "The Million Dollar Homepage" and sold one million pixels at $1 each. He made a million dollars!
+                    </p>
+                    <p class="text-gray-300 text-lg leading-relaxed mb-6">
+                        <span data-en="Today, we revive this idea with an Arabic twist. Not just an ad site, but a" data-ar="اليوم، نعيد إحياء هذه الفكرة بنكهة عربية. ليس فقط موقع إعلانات، بل">Today, we revive this idea with an Arabic twist. Not just an ad site, but a</span>
+                        <span class="text-pink-400 font-bold" data-en="digital museum" data-ar="متحف رقمي">digital museum</span>
+                        <span data-en="documenting a moment in time." data-ar="يوثق لحظة من الزمن.">documenting a moment in time.</span>
+                    </p>
+                    <p class="text-gray-300 text-lg leading-relaxed" data-en="Every cell tells a story. Every logo carries a dream. Once the page fills up, it becomes a permanent historical archive." data-ar="كل خانة تحكي قصة. كل شعار يحمل حلم. وبعد امتلاء الصفحة، تتحول إلى أرشيف تاريخي لا يُمحى.">
+                        Every cell tells a story. Every logo carries a dream. Once the page fills up, it becomes a permanent historical archive.
+                    </p>
+                </div>
+                <div class="bg-gradient-to-br from-purple-900/50 to-pink-900/50 p-8 rounded-3xl border border-purple-500/30">
+                    <h3 class="text-2xl font-bold mb-6 text-center">
+                        🏆 <span data-en="What You Get" data-ar="ماذا تحصل؟">What You Get</span>
+                    </h3>
+                    <ul class="space-y-4">
+                        <li class="flex items-start gap-3">
+                            <span class="text-2xl">✅</span>
+                            <span data-en="Permanent cell that never gets deleted" data-ar="خانة دائمة لا تُحذف أبداً">Permanent cell that never gets deleted</span>
+                        </li>
+                        <li class="flex items-start gap-3">
+                            <span class="text-2xl">✅</span>
+                            <span data-en="Link to your website or page" data-ar="رابط لموقعك أو صفحتك">Link to your website or page</span>
+                        </li>
+                        <li class="flex items-start gap-3">
+                            <span class="text-2xl">✅</span>
+                            <span data-en="Unique serial number" data-ar="رقم تسلسلي فريد">Unique serial number</span>
+                        </li>
+                        <li class="flex items-start gap-3">
+                            <span class="text-2xl">✅</span>
+                            <span data-en="Date & time documentation" data-ar="توثيق التاريخ والوقت">Date & time documentation</span>
+                        </li>
+                        <li class="flex items-start gap-3">
+                            <span class="text-2xl">✅</span>
+                            <span data-en="Your own story page" data-ar="صفحة قصة خاصة بك">Your own story page</span>
+                        </li>
+                        <li class="flex items-start gap-3">
+                            <span class="text-2xl">✅</span>
+                            <span data-en="Part of Arabic digital history" data-ar="جزء من التاريخ الرقمي العربي">Part of Arabic digital history</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Grid Section -->
+    <section id="grid" class="py-20">
+        <div class="max-w-7xl mx-auto px-4">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl sm:text-4xl font-black mb-4">
+                    <span data-en="The Million Grid 🎨" data-ar="الشبكة المليونية 🎨">The Million Grid 🎨</span>
+                </h2>
+                <p class="text-gray-400" data-en="Click any colored cell to see details, or empty cell to claim it" data-ar="اضغط على أي خانة ملونة لرؤية تفاصيلها، أو على خانة فارغة لحجزها">Click any colored cell to see details, or empty cell to claim it</p>
+                <p class="text-sm text-gray-500 mt-2" data-en="(Showing preview - 100×100 = 10,000 cells)" data-ar="(عرض جزء من الشبكة - 100×100 = 10,000 خانة)">(Showing preview - 100×100 = 10,000 cells)</p>
+            </div>
+            
+            <!-- Grid Container -->
+            <div class="bg-gray-800 p-4 rounded-2xl overflow-auto max-h-[600px] border border-gray-700">
+                <div id="pixelGrid" class="flex flex-wrap" style="width: 1000px;"></div>
+            </div>
+            
+            <!-- Legend -->
+            <div class="flex justify-center gap-8 mt-6">
+                <div class="flex items-center gap-2">
+                    <div class="w-4 h-4 bg-gradient-to-br from-gray-700 to-gray-800 rounded"></div>
+                    <span class="text-gray-400" data-en="Available" data-ar="متاحة للبيع">Available</span>
+                </div>
+                <div class="flex items-center gap-2">
+                    <div class="w-4 h-4 bg-gradient-to-br from-pink-500 to-purple-500 rounded"></div>
+                    <span class="text-gray-400" data-en="Sold" data-ar="مباعة">Sold</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- How to Buy -->
+    <section id="how" class="py-20 bg-gray-800/50">
+        <div class="max-w-5xl mx-auto px-4">
+            <h2 class="text-3xl sm:text-4xl font-black text-center mb-16">
+                <span data-en="How to Claim Your Cell? 🛒" data-ar="كيف تحجز خانتك؟ 🛒">How to Claim Your Cell? 🛒</span>
+            </h2>
+            <div class="grid sm:grid-cols-2 md:grid-cols-4 gap-8">
+                <div class="text-center">
+                    <div class="w-16 sm:w-20 h-16 sm:h-20 bg-gradient-to-br from-pink-500 to-purple-600 rounded-full flex items-center justify-center mx-auto mb-4 text-2xl sm:text-3xl font-bold">1</div>
+                    <h3 class="text-lg sm:text-xl font-bold mb-2" data-en="Choose a Cell" data-ar="اختر خانة">Choose a Cell</h3>
+                    <p class="text-gray-400 text-sm sm:text-base" data-en="Click any empty cell in the grid" data-ar="اضغط على أي خانة فارغة في الشبكة">Click any empty cell in the grid</p>
+                </div>
+                <div class="text-center">
+                    <div class="w-16 sm:w-20 h-16 sm:h-20 bg-gradient-to-br from-pink-500 to-purple-600 rounded-full flex items-center justify-center mx-auto mb-4 text-2xl sm:text-3xl font-bold">2</div>
+                    <h3 class="text-lg sm:text-xl font-bold mb-2" data-en="Send Your Logo" data-ar="أرسل شعارك">Send Your Logo</h3>
+                    <p class="text-gray-400 text-sm sm:text-base" data-en="Upload your logo or any image" data-ar="ارفع صورة شعارك أو أي صورة تريدها">Upload your logo or any image</p>
+                </div>
+                <div class="text-center">
+                    <div class="w-16 sm:w-20 h-16 sm:h-20 bg-gradient-to-br from-pink-500 to-purple-600 rounded-full flex items-center justify-center mx-auto mb-4 text-2xl sm:text-3xl font-bold">3</div>
+                    <h3 class="text-lg sm:text-xl font-bold mb-2" data-en="Pay 1 JOD" data-ar="ادفع 1 دينار">Pay 1 JOD</h3>
+                    <p class="text-gray-400 text-sm sm:text-base" data-en="Via CliQ or Bank Transfer" data-ar="عبر CliQ أو حوالة بنكية">Via CliQ or Bank Transfer</p>
+                </div>
+                <div class="text-center">
+                    <div class="w-16 sm:w-20 h-16 sm:h-20 bg-gradient-to-br from-pink-500 to-purple-600 rounded-full flex items-center justify-center mx-auto mb-4 text-2xl sm:text-3xl font-bold">4</div>
+                    <h3 class="text-lg sm:text-xl font-bold mb-2" data-en="You're Part of History!" data-ar="أصبحت جزءاً من التاريخ!">You're Part of History!</h3>
+                    <p class="text-gray-400 text-sm sm:text-base" data-en="Your cell is saved forever" data-ar="خانتك محفوظة للأبد">Your cell is saved forever</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Payment Section -->
+    <section id="payment" class="py-20">
+        <div class="max-w-4xl mx-auto px-4">
+            <h2 class="text-3xl sm:text-4xl font-black text-center mb-4">
+                💳 <span data-en="Payment Methods" data-ar="طرق الدفع">Payment Methods</span>
+            </h2>
+            <p class="text-center text-gray-400 mb-12" data-en="Choose your preferred payment method" data-ar="اختر طريقة الدفع المفضلة لديك">Choose your preferred payment method</p>
+            
+            <div class="grid md:grid-cols-2 gap-6">
+                <!-- CliQ Payment -->
+                <div class="payment-card p-6 rounded-2xl">
+                    <div class="flex items-center gap-3 mb-6">
+                        <div class="w-12 h-12 bg-gradient-to-br from-green-500 to-emerald-600 rounded-xl flex items-center justify-center text-2xl">📱</div>
+                        <div>
+                            <h3 class="text-xl font-bold">CliQ</h3>
+                            <p class="text-gray-400 text-sm" data-en="Instant Transfer" data-ar="تحويل فوري">Instant Transfer</p>
+                        </div>
+                    </div>
+                    <div class="space-y-4">
+                        <div class="bg-gray-800/50 p-4 rounded-xl">
+                            <div class="text-sm text-gray-400 mb-1" data-en="CliQ Alias" data-ar="الاسم المستعار">CliQ Alias</div>
+                            <div class="flex items-center justify-between">
+                                <span class="font-mono text-lg text-pink-400" id="cliqAlias">FVG</span>
+                                <button onclick="copyToClipboard('cliqAlias')" class="copy-btn bg-gray-700 px-3 py-1 rounded-lg text-sm hover:bg-gray-600 transition">
+                                    <span data-en="Copy" data-ar="نسخ">Copy</span> 📋
+                                </button>
+                            </div>
+                        </div>
+                        <div class="bg-gray-800/50 p-4 rounded-xl">
+                            <div class="text-sm text-gray-400 mb-1" data-en="Account Name" data-ar="اسم الحساب">Account Name</div>
+                            <div class="font-semibold" id="cliqName">MAHMOUD OMAR HEIDER AL SMADI</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Bank Transfer -->
+                <div class="payment-card p-6 rounded-2xl">
+                    <div class="flex items-center gap-3 mb-6">
+                        <div class="w-12 h-12 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-xl flex items-center justify-center text-2xl">🏦</div>
+                        <div>
+                            <h3 class="text-xl font-bold" data-en="Bank Transfer" data-ar="حوالة بنكية">Bank Transfer</h3>
+                            <p class="text-gray-400 text-sm" data-en="1-2 Business Days" data-ar="1-2 يوم عمل">1-2 Business Days</p>
+                        </div>
+                    </div>
+                    <div class="space-y-4">
+                        <div class="bg-gray-800/50 p-4 rounded-xl">
+                            <div class="text-sm text-gray-400 mb-1" data-en="Bank Name" data-ar="اسم البنك">Bank Name</div>
+                            <div class="font-semibold" id="bankName">Arab Bank</div>
+                        </div>
+                        <div class="bg-gray-800/50 p-4 rounded-xl">
+                            <div class="text-sm text-gray-400 mb-1" data-en="Account Name" data-ar="اسم صاحب الحساب">Account Name</div>
+                            <div class="font-semibold" id="accountName">MAHMOUD OMAR HEIDER AL SMADI</div>
+                        </div>
+                        <div class="bg-gray-800/50 p-4 rounded-xl">
+                            <div class="text-sm text-gray-400 mb-1">IBAN</div>
+                            <div class="flex items-center justify-between">
+                                <span class="font-mono text-sm text-pink-400" id="ibanNumber">JO29ARAB9000030022415300368500</span>
+                                <button onclick="copyToClipboard('ibanNumber')" class="copy-btn bg-gray-700 px-3 py-1 rounded-lg text-sm hover:bg-gray-600 transition">
+                                    <span data-en="Copy" data-ar="نسخ">Copy</span> 📋
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Important Note -->
+            <div class="mt-8 bg-yellow-500/10 border border-yellow-500/30 p-6 rounded-2xl">
+                <h4 class="text-yellow-400 font-bold mb-3 flex items-center gap-2">
+                    ⚠️ <span data-en="Important" data-ar="مهم">Important</span>
+                </h4>
+                <ul class="space-y-2 text-gray-300 text-sm sm:text-base">
+                    <li data-en="• After payment, send screenshot + your details to WhatsApp or Email" data-ar="• بعد الدفع، أرسل صورة الحوالة + بياناتك على واتساب أو الإيميل">• After payment, send screenshot + your details to WhatsApp or Email</li>
+                    <li data-en="• Include: Name, Email, Logo, Website URL, Your Story" data-ar="• أرفق: الاسم، الإيميل، الشعار، رابط موقعك، قصتك">• Include: Name, Email, Logo, Website URL, Your Story</li>
+                    <li data-en="• Your cell will be activated within 24 hours" data-ar="• سيتم تفعيل خانتك خلال 24 ساعة">• Your cell will be activated within 24 hours</li>
+                </ul>
+                <div class="mt-4 flex flex-wrap gap-4">
+                    <a href="https://wa.me/962775925599" target="_blank" class="inline-flex items-center gap-2 bg-green-600 px-4 py-2 rounded-lg hover:bg-green-700 transition">
+                        <span>📱</span> WhatsApp
+                    </a>
+                    <a href="mailto:ezz2006m@gmail.com" class="inline-flex items-center gap-2 bg-blue-600 px-4 py-2 rounded-lg hover:bg-blue-700 transition">
+                        <span>✉️</span> Email
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Charter Section -->
+    <section id="charter" class="py-20 bg-gray-800/50">
+        <div class="max-w-4xl mx-auto px-4">
+            <div class="bg-gradient-to-br from-purple-900/30 to-pink-900/30 p-8 sm:p-10 rounded-3xl border border-purple-500/30">
+                <h2 class="text-3xl sm:text-4xl font-black text-center mb-4">
+                    📜 <span data-en="The Million Page Charter" data-ar="ميثاق الصفحة المليون">The Million Page Charter</span>
+                </h2>
+                <p class="text-center text-gray-400 mb-10" data-en="Official pledge that won't be broken" data-ar="تعهد رسمي لا يُخل">Official pledge that won't be broken</p>
+                
+                <div class="grid sm:grid-cols-2 gap-6">
+                    <div class="bg-gray-800/50 p-6 rounded-xl border border-gray-700">
+                        <h3 class="text-xl font-bold mb-3 flex items-center gap-2">
+                            <span class="text-2xl">💰</span> 
+                            <span data-en="Fixed Price" data-ar="السعر ثابت">Fixed Price</span>
+                        </h3>
+                        <p class="text-gray-400" data-en="1 JOD per cell. From day one until the last cell. No increases." data-ar="دينار واحد للخانة. من أول يوم حتى آخر خانة. لا زيادات.">1 JOD per cell. From day one until the last cell. No increases.</p>
+                    </div>
+                    <div class="bg-gray-800/50 p-6 rounded-xl border border-gray-700">
+                        <h3 class="text-xl font-bold mb-3 flex items-center gap-2">
+                            <span class="text-2xl">🔒</span> 
+                            <span data-en="No Deletion" data-ar="لا حذف">No Deletion</span>
+                        </h3>
+                        <p class="text-gray-400" data-en="Sold cells will never be deleted. No matter what." data-ar="الخانات المباعة لن تُحذف أبداً. مهما حصل.">Sold cells will never be deleted. No matter what.</p>
+                    </div>
+                    <div class="bg-gray-800/50 p-6 rounded-xl border border-gray-700">
+                        <h3 class="text-xl font-bold mb-3 flex items-center gap-2">
+                            <span class="text-2xl">✏️</span> 
+                            <span data-en="No Modification" data-ar="لا تعديل">No Modification</span>
+                        </h3>
+                        <p class="text-gray-400" data-en="Stories and logos stay as they are. True archive." data-ar="القصص والشعارات تبقى كما هي. أرشيف حقيقي.">Stories and logos stay as they are. True archive.</p>
+                    </div>
+                    <div class="bg-gray-800/50 p-6 rounded-xl border border-gray-700">
+                        <h3 class="text-xl font-bold mb-3 flex items-center gap-2">
+                            <span class="text-2xl">🏛️</span> 
+                            <span data-en="Museum Forever" data-ar="متحف للأبد">Museum Forever</span>
+                        </h3>
+                        <p class="text-gray-400" data-en="After filling up, the site becomes a permanent digital museum." data-ar="بعد الامتلاء، الموقع يتحول لمتحف رقمي دائم.">After filling up, the site becomes a permanent digital museum.</p>
+                    </div>
+                </div>
+
+                <div class="mt-10 text-center">
+                    <p class="text-xl sm:text-2xl font-bold text-pink-400" data-en="'Building complete, history begins'" data-ar="'انتهى البناء، وبدأ التاريخ'">"Building complete, history begins"</p>
+                    <p class="text-gray-500 mt-2" data-en="- Tagline after the page fills up" data-ar="- شعار الصفحة بعد الامتلاء">- Tagline after the page fills up</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Stats Section -->
+    <section id="stats" class="py-20">
+        <div class="max-w-6xl mx-auto px-4">
+            <h2 class="text-3xl sm:text-4xl font-black text-center mb-16">
+                📊 <span data-en="Live Statistics" data-ar="إحصائيات حية">Live Statistics</span>
+            </h2>
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6">
+                <div class="bg-gray-800 p-6 sm:p-8 rounded-2xl text-center border border-gray-700">
+                    <div class="text-4xl sm:text-5xl font-black text-pink-400 mb-2">247</div>
+                    <div class="text-gray-400 text-sm sm:text-base" data-en="Cells Sold" data-ar="خانة مباعة">Cells Sold</div>
+                </div>
+                <div class="bg-gray-800 p-6 sm:p-8 rounded-2xl text-center border border-gray-700">
+                    <div class="text-4xl sm:text-5xl font-black text-green-400 mb-2">12</div>
+                    <div class="text-gray-400 text-sm sm:text-base" data-en="Countries" data-ar="دولة مشاركة">Countries</div>
+                </div>
+                <div class="bg-gray-800 p-6 sm:p-8 rounded-2xl text-center border border-gray-700">
+                    <div class="text-4xl sm:text-5xl font-black text-yellow-400 mb-2">45</div>
+                    <div class="text-gray-400 text-sm sm:text-base" data-en="Companies" data-ar="شركة">Companies</div>
+                </div>
+                <div class="bg-gray-800 p-6 sm:p-8 rounded-2xl text-center border border-gray-700">
+                    <div class="text-4xl sm:text-5xl font-black text-purple-400 mb-2">202</div>
+                    <div class="text-gray-400 text-sm sm:text-base" data-en="Individuals" data-ar="فرد">Individuals</div>
+                </div>
+            </div>
+
+            <!-- Recent Buyers -->
+            <div class="mt-16">
+                <h3 class="text-2xl font-bold text-center mb-8">
+                    🕐 <span data-en="Recent Buyers" data-ar="آخر المشترين">Recent Buyers</span>
+                </h3>
+                <div class="grid sm:grid-cols-2 md:grid-cols-3 gap-4">
+                    <div class="bg-gray-800 p-4 rounded-xl border border-gray-700 flex items-center gap-4">
+                        <div class="w-12 h-12 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-lg flex-shrink-0"></div>
+                        <div class="min-w-0">
+                            <div class="font-bold truncate">Horizon Tech Co.</div>
+                            <div class="text-sm text-gray-400">Cell #247 • 1h ago</div>
+                        </div>
+                    </div>
+                    <div class="bg-gray-800 p-4 rounded-xl border border-gray-700 flex items-center gap-4">
+                        <div class="w-12 h-12 bg-gradient-to-br from-orange-500 to-red-500 rounded-lg flex-shrink-0"></div>
+                        <div class="min-w-0">
+                            <div class="font-bold truncate">Mohammad Al-Urduni</div>
+                            <div class="text-sm text-gray-400">Cell #246 • 3h ago</div>
+                        </div>
+                    </div>
+                    <div class="bg-gray-800 p-4 rounded-xl border border-gray-700 flex items-center gap-4">
+                        <div class="w-12 h-12 bg-gradient-to-br from-green-500 to-emerald-500 rounded-lg flex-shrink-0"></div>
+                        <div class="min-w-0">
+                            <div class="font-bold truncate">Al-Deera Restaurant</div>
+                            <div class="text-sm text-gray-400">Cell #245 • 5h ago</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- First 100 Section -->
+    <section class="py-20 bg-gray-800/50">
+        <div class="max-w-4xl mx-auto px-4 text-center">
+            <div class="bg-gradient-to-r from-yellow-500/20 to-orange-500/20 p-8 sm:p-10 rounded-3xl border border-yellow-500/30">
+                <div class="pioneer-badge inline-block px-4 py-2 rounded-full text-sm font-bold mb-6">
+                    🏅 <span data-en="PIONEER BADGE" data-ar="شارة الرواد">PIONEER BADGE</span>
+                </div>
+                <h2 class="text-2xl sm:text-3xl font-black mb-4">
+                    <span data-en="First 100 Buyers" data-ar="أول 100 مشتري">First 100 Buyers</span>
+                </h2>
+                <p class="text-gray-300 text-base sm:text-lg mb-6" data-en="The first 100 people to buy will receive the golden 'Pioneers' badge and will be remembered forever as the founders of this digital museum" data-ar="أول 100 شخص يشترون سيحصلون على شارة 'الرواد الأوائل' الذهبية وسيُذكرون للأبد كمؤسسي هذا المتحف الرقمي">
+                    The first 100 people to buy will receive the golden "Pioneers" badge and will be remembered forever as the founders of this digital museum
+                </p>
+                <div class="text-5xl sm:text-6xl font-black text-yellow-400 mb-2">53</div>
+                <div class="text-gray-400" data-en="spots remaining out of 100" data-ar="مكان متبقي من أصل 100">spots remaining out of 100</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- FAQ Section -->
+    <section class="py-20">
+        <div class="max-w-4xl mx-auto px-4">
+            <h2 class="text-3xl sm:text-4xl font-black text-center mb-12">
+                ❓ <span data-en="Frequently Asked Questions" data-ar="الأسئلة الشائعة">Frequently Asked Questions</span>
+            </h2>
+            <div class="space-y-4">
+                <div class="bg-gray-800 rounded-2xl border border-gray-700 overflow-hidden">
+                    <button class="faq-toggle w-full p-6 text-right flex justify-between items-center hover:bg-gray-700/50 transition" onclick="toggleFAQ(this)">
+                        <span class="font-bold text-lg" data-en="How long will my cell stay?" data-ar="كم ستبقى خانتي؟">How long will my cell stay?</span>
+                        <span class="text-2xl">+</span>
+                    </button>
+                    <div class="faq-content hidden px-6 pb-6 text-gray-400" data-en="Forever! Once you purchase a cell, it becomes a permanent part of the page. Even after all cells are sold, the site transforms into a digital museum that will be maintained indefinitely." data-ar="للأبد! بمجرد شرائك للخانة، تصبح جزءاً دائماً من الصفحة. حتى بعد بيع جميع الخانات، يتحول الموقع إلى متحف رقمي سيتم الحفاظ عليه إلى أجل غير مسمى.">
+                        Forever! Once you purchase a cell, it becomes a permanent part of the page. Even after all cells are sold, the site transforms into a digital museum that will be maintained indefinitely.
+                    </div>
+                </div>
+                <div class="bg-gray-800 rounded-2xl border border-gray-700 overflow-hidden">
+                    <button class="faq-toggle w-full p-6 text-right flex justify-between items-center hover:bg-gray-700/50 transition" onclick="toggleFAQ(this)">
+                        <span class="font-bold text-lg" data-en="Can I buy multiple cells?" data-ar="هل يمكنني شراء أكثر من خانة؟">Can I buy multiple cells?</span>
+                        <span class="text-2xl">+</span>
+                    </button>
+                    <div class="faq-content hidden px-6 pb-6 text-gray-400" data-en="Yes! You can buy as many cells as you want. Each cell is 1 JOD. If you want a bigger logo, you can purchase multiple adjacent cells." data-ar="نعم! يمكنك شراء أي عدد تريده من الخانات. كل خانة بدينار واحد. إذا كنت تريد شعاراً أكبر، يمكنك شراء عدة خانات متجاورة.">
+                        Yes! You can buy as many cells as you want. Each cell is 1 JOD. If you want a bigger logo, you can purchase multiple adjacent cells.
+                    </div>
+                </div>
+                <div class="bg-gray-800 rounded-2xl border border-gray-700 overflow-hidden">
+                    <button class="faq-toggle w-full p-6 text-right flex justify-between items-center hover:bg-gray-700/50 transition" onclick="toggleFAQ(this)">
+                        <span class="font-bold text-lg" data-en="What can I put in my cell?" data-ar="ماذا يمكنني وضعه في خانتي؟">What can I put in my cell?</span>
+                        <span class="text-2xl">+</span>
+                    </button>
+                    <div class="faq-content hidden px-6 pb-6 text-gray-400" data-en="Any image you want! Company logo, personal photo, artwork, or any creative image. Just make sure it doesn't violate any laws or contain inappropriate content." data-ar="أي صورة تريدها! شعار شركة، صورة شخصية، عمل فني، أو أي صورة إبداعية. فقط تأكد من أنها لا تنتهك أي قوانين أو تحتوي على محتوى غير لائق.">
+                        Any image you want! Company logo, personal photo, artwork, or any creative image. Just make sure it doesn't violate any laws or contain inappropriate content.
+                    </div>
+                </div>
+                <div class="bg-gray-800 rounded-2xl border border-gray-700 overflow-hidden">
+                    <button class="faq-toggle w-full p-6 text-right flex justify-between items-center hover:bg-gray-700/50 transition" onclick="toggleFAQ(this)">
+                        <span class="font-bold text-lg" data-en="Is the price really 1 JOD forever?" data-ar="هل السعر فعلاً 1 دينار للأبد؟">Is the price really 1 JOD forever?</span>
+                        <span class="text-2xl">+</span>
+                    </button>
+                    <div class="faq-content hidden px-6 pb-6 text-gray-400" data-en="Yes! We pledge in our charter that the price will remain 1 JOD from the first cell to the last. This is part of what makes this project special and accessible to everyone." data-ar="نعم! نتعهد في ميثاقنا أن السعر سيبقى 1 دينار من أول خانة إلى آخر خانة. هذا جزء مما يجعل هذا المشروع مميزاً ومتاحاً للجميع.">
+                        Yes! We pledge in our charter that the price will remain 1 JOD from the first cell to the last. This is part of what makes this project special and accessible to everyone.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA Section -->
+    <section class="py-20 bg-gradient-to-r from-pink-600 to-purple-600">
+        <div class="max-w-4xl mx-auto px-4 text-center">
+            <h2 class="text-3xl sm:text-4xl font-black mb-6">
+                <span data-en="Ready to be part of history?" data-ar="جاهز تكون جزء من التاريخ؟">Ready to be part of history?</span>
+            </h2>
+            <p class="text-lg sm:text-xl opacity-90 mb-8" data-en="Just 1 JOD. One cell. Eternal memory." data-ar="دينار واحد فقط. خانة واحدة. ذكرى دائمة.">Just 1 JOD. One cell. Eternal memory.</p>
+            <button onclick="openBuyModal()" class="bg-white text-purple-600 px-10 sm:px-12 py-3 sm:py-4 rounded-full font-bold text-lg sm:text-xl hover:bg-gray-100 transition transform hover:scale-105">
+                <span data-en="Claim Your Cell Now 🚀" data-ar="احجز خانتك الآن 🚀">Claim Your Cell Now 🚀</span>
+            </button>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="py-10 bg-gray-900 border-t border-gray-800">
+        <div class="max-w-6xl mx-auto px-4">
+            <div class="flex flex-wrap justify-between items-center gap-6">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 bg-gradient-to-br from-pink-500 to-purple-600 rounded-lg flex items-center justify-center text-xl font-bold">M</div>
+                    <span class="text-xl font-bold" data-en="Million Logo Page" data-ar="الصفحة المليون شعار">Million Logo Page</span>
+                </div>
+                <div class="text-gray-400">
+                    <span data-en="Made with ❤️ in Jordan" data-ar="صنع بـ ❤️ في الأردن">Made with ❤️ in Jordan</span>
+                </div>
+                <div class="flex gap-4">
+                    <a href="#" class="text-gray-400 hover:text-pink-400" data-en="Contact" data-ar="تواصل معنا">Contact</a>
+                    <a href="#" class="text-gray-400 hover:text-pink-400" data-en="FAQ" data-ar="الأسئلة الشائعة">FAQ</a>
+                </div>
+            </div>
+            <div class="mt-6 pt-6 border-t border-gray-800 text-center text-gray-500 text-sm">
+                © 2024 Million Logo Page. <span data-en="All rights reserved." data-ar="جميع الحقوق محفوظة.">All rights reserved.</span>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Buy Modal -->
+    <div id="buyModal" class="fixed inset-0 bg-black/80 z-50 hidden items-center justify-center p-4 overflow-y-auto">
+        <div class="bg-gray-900 rounded-3xl max-w-lg w-full p-6 sm:p-8 border border-gray-700 relative my-8">
+            <button onclick="closeBuyModal()" class="absolute top-4 left-4 text-gray-400 hover:text-white text-2xl">&times;</button>
+            <h3 class="text-2xl font-black mb-6 text-center">
+                🎯 <span data-en="Claim Your Cell" data-ar="احجز خانتك">Claim Your Cell</span>
+            </h3>
+            
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-gray-400 mb-2" data-en="Name or Company Name" data-ar="الاسم أو اسم الشركة">Name or Company Name</label>
+                    <input type="text" id="buyName" class="w-full bg-gray-800 border border-gray-700 rounded-xl px-4 py-3 focus:border-pink-500 outline-none" placeholder="Example: Success Company">
+                </div>
+                <div>
+                    <label class="block text-gray-400 mb-2" data-en="Email" data-ar="البريد الإلكتروني">Email</label>
+                    <input type="email" id="buyEmail" class="w-full bg-gray-800 border border-gray-700 rounded-xl px-4 py-3 focus:border-pink-500 outline-none" placeholder="email@example.com">
+                </div>
+                <div>
+                    <label class="block text-gray-400 mb-2" data-en="Your Website (Optional)" data-ar="رابط موقعك (اختياري)">Your Website (Optional)</label>
+                    <input type="url" id="buyUrl" class="w-full bg-gray-800 border border-gray-700 rounded-xl px-4 py-3 focus:border-pink-500 outline-none" placeholder="https://yoursite.com">
+                </div>
+                <div>
+                    <label class="block text-gray-400 mb-2" data-en="Your Story (Why are you buying?)" data-ar="قصتك (لماذا تشتري؟)">Your Story (Why are you buying?)</label>
+                    <textarea id="buyStory" class="w-full bg-gray-800 border border-gray-700 rounded-xl px-4 py-3 focus:border-pink-500 outline-none h-24" placeholder="Share your story..."></textarea>
+                </div>
+                <div>
+                    <label class="block text-gray-400 mb-2" data-en="Number of Cells" data-ar="عدد الخانات">Number of Cells</label>
+                    <div class="flex items-center gap-4">
+                        <button onclick="changeCellCount(-1)" class="w-10 h-10 bg-gray-800 rounded-lg hover:bg-gray-700 transition text-xl">-</button>
+                        <input type="number" id="cellCount" value="1" min="1" class="w-20 bg-gray-800 border border-gray-700 rounded-xl px-4 py-3 focus:border-pink-500 outline-none text-center" onchange="updateTotal()">
+                        <button onclick="changeCellCount(1)" class="w-10 h-10 bg-gray-800 rounded-lg hover:bg-gray-700 transition text-xl">+</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mt-6 p-4 bg-gray-800 rounded-xl">
+                <div class="flex justify-between items-center">
+                    <span data-en="Total:" data-ar="المجموع:">Total:</span>
+                    <span class="text-2xl font-black text-pink-400"><span id="totalAmount">1</span> JOD</span>
+                </div>
+            </div>
+
+            <div class="mt-6 p-4 bg-blue-500/10 border border-blue-500/30 rounded-xl">
+                <p class="text-sm text-blue-300" data-en="After clicking 'Continue', you'll be shown payment details. Complete the payment and send proof via WhatsApp/Email." data-ar="بعد الضغط على 'متابعة'، ستظهر لك تفاصيل الدفع. أكمل الدفع وأرسل الإثبات عبر واتساب/الإيميل.">
+                    After clicking "Continue", you'll be shown payment details. Complete the payment and send proof via WhatsApp/Email.
+                </p>
+            </div>
+
+            <button onclick="showPaymentDetails()" class="w-full mt-6 bg-gradient-to-r from-pink-500 to-purple-600 py-4 rounded-xl font-bold text-lg hover:opacity-90 transition">
+                <span data-en="Continue to Payment ➜" data-ar="متابعة للدفع ➜">Continue to Payment ➜</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- Cell Info Modal -->
+    <div id="cellModal" class="fixed inset-0 bg-black/80 z-50 hidden items-center justify-center p-4">
+        <div class="bg-gray-900 rounded-3xl max-w-md w-full p-6 sm:p-8 border border-gray-700 relative">
+            <button onclick="closeCellModal()" class="absolute top-4 left-4 text-gray-400 hover:text-white text-2xl">&times;</button>
+            <div id="cellContent"></div>
+        </div>
+    </div>
+
+    <!-- Payment Details Modal -->
+    <div id="paymentModal" class="fixed inset-0 bg-black/80 z-50 hidden items-center justify-center p-4 overflow-y-auto">
+        <div class="bg-gray-900 rounded-3xl max-w-lg w-full p-6 sm:p-8 border border-gray-700 relative my-8">
+            <button onclick="closePaymentModal()" class="absolute top-4 left-4 text-gray-400 hover:text-white text-2xl">&times;</button>
+            <h3 class="text-2xl font-black mb-6 text-center">
+                💳 <span data-en="Complete Payment" data-ar="إتمام الدفع">Complete Payment</span>
+            </h3>
+            
+            <div class="bg-pink-500/10 border border-pink-500/30 p-4 rounded-xl mb-6 text-center">
+                <div class="text-sm text-gray-400 mb-1" data-en="Amount to Pay" data-ar="المبلغ المطلوب">Amount to Pay</div>
+                <div class="text-3xl font-black text-pink-400"><span id="paymentAmount">1</span> JOD</div>
+            </div>
+
+            <div class="space-y-4">
+                <div class="payment-card p-4 rounded-xl">
+                    <div class="font-bold mb-2 flex items-center gap-2">📱 CliQ</div>
+                    <div class="text-sm text-gray-400">Alias: <span class="text-pink-400 font-mono">FVG</span></div>
+                </div>
+                <div class="payment-card p-4 rounded-xl">
+                    <div class="font-bold mb-2 flex items-center gap-2">🏦 Arab Bank</div>
+                    <div class="text-sm text-gray-400">IBAN: <span class="text-pink-400 font-mono text-xs">JO29ARAB9000030022415300368500</span></div>
+                </div>
+            </div>
+
+            <div class="mt-6 bg-yellow-500/10 border border-yellow-500/30 p-4 rounded-xl">
+                <p class="text-sm text-yellow-300" data-en="After payment, send proof + your details to:" data-ar="بعد الدفع، أرسل إثبات الدفع + بياناتك إلى:">
+                    After payment, send proof + your details to:
+                </p>
+                <div class="flex gap-3 mt-3">
+                    <a href="https://wa.me/962775925599" target="_blank" class="flex-1 bg-green-600 text-center py-2 rounded-lg text-sm hover:bg-green-700 transition">WhatsApp</a>
+                    <a href="mailto:ezz2006m@gmail.com" class="flex-1 bg-blue-600 text-center py-2 rounded-lg text-sm hover:bg-blue-700 transition">Email</a>
+                </div>
+            </div>
+
+            <button onclick="closePaymentModal()" class="w-full mt-6 bg-gradient-to-r from-pink-500 to-purple-600 py-4 rounded-xl font-bold text-lg hover:opacity-90 transition">
+                <span data-en="Done ✓" data-ar="تم ✓">Done ✓</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="fixed bottom-4 right-4 bg-green-600 text-white px-6 py-3 rounded-xl shadow-lg transform translate-y-20 opacity-0 transition-all duration-300 z-50">
+        <span id="toastMessage">Copied!</span>
+    </div>
+
+    <script>
+        // Language System
+        let currentLang = 'en';
+
+        function toggleLanguage() {
+            currentLang = currentLang === 'en' ? 'ar' : 'en';
+            updateLanguage();
+        }
+
+        function updateLanguage() {
+            const html = document.documentElement;
+            const body = document.body;
+            
+            if (currentLang === 'ar') {
+                html.lang = 'ar';
+                html.dir = 'rtl';
+                body.dir = 'rtl';
+                document.getElementById('langIcon').textContent = '🇯🇴';
+                document.getElementById('langText').textContent = 'ع';
+            } else {
+                html.lang = 'en';
+                html.dir = 'ltr';
+                body.dir = 'ltr';
+                document.getElementById('langIcon').textContent = '🇬🇧';
+                document.getElementById('langText').textContent = 'EN';
+            }
+
+            // Update all translatable elements
+            document.querySelectorAll('[data-en]').forEach(el => {
+                const text = el.getAttribute(`data-${currentLang}`);
+                if (text) {
+                    el.textContent = text;
+                }
+            });
+        }
+
+        // Sample sold cells data
+        const soldCells = [
+            { id: 45, name: "Horizon Tech", nameAr: "شركة الأفق", color: "#3B82F6", url: "https://example.com", date: "2024-01-15", story: "We want to be part of Arabic digital history", storyAr: "نريد أن نكون جزءاً من التاريخ الرقمي العربي" },
+            { id: 123, name: "Mohammad Ahmad", nameAr: "محمد أحمد", color: "#EF4444", url: "", date: "2024-01-14", story: "A gift for my son's birthday", storyAr: "هدية لابني في عيد ميلاده" },
+            { id: 234, name: "Al-Karam Restaurant", nameAr: "مطعم الكرم", color: "#10B981", url: "https://alkaramrest.com", date: "2024-01-13", story: "Simple advertising at a symbolic price", storyAr: "دعاية بسيطة بسعر رمزي" },
+            { id: 567, name: "Creative Store", nameAr: "متجر الإبداع", color: "#F59E0B", url: "https://creative.jo", date: "2024-01-12", story: "Great idea we love to support", storyAr: "فكرة رائعة نحب ندعمها" },
+            { id: 789, name: "Ahmad Al-Khatib", nameAr: "أحمد الخطيب", color: "#8B5CF6", url: "", date: "2024-01-11", story: "Why not? Just 1 JOD!", storyAr: "ليش لا؟ دينار واحد!" },
+            { id: 890, name: "Future Company", nameAr: "شركة المستقبل", color: "#EC4899", url: "https://future.jo", date: "2024-01-10", story: "Investing in digital memory", storyAr: "استثمار في الذاكرة الرقمية" },
+            { id: 1234, name: "Tech Stars", nameAr: "نجوم التقنية", color: "#06B6D4", url: "https://techstars.jo", date: "2024-01-09", story: "Supporting innovative projects", storyAr: "دعم المشاريع المبتكرة" },
+            { id: 2345, name: "Sara Abdullah", nameAr: "سارة عبدالله", color: "#84CC16", url: "", date: "2024-01-08", story: "My first digital investment!", storyAr: "أول استثمار رقمي لي!" },
+        ];
+
+        // Generate grid
+        function generateGrid() {
+            const grid = document.getElementById('pixelGrid');
+            const totalCells = 10000;
+            
+            for (let i = 0; i < totalCells; i++) {
+                const cell = document.createElement('div');
+                cell.className = 'grid-cell';
+                
+                const soldCell = soldCells.find(c => c.id === i);
+                
+                if (soldCell) {
+                    cell.classList.add('sold');
+                    cell.style.backgroundColor = soldCell.color;
+                    cell.onclick = () => showCellInfo(soldCell);
+                    cell.title = currentLang === 'ar' ? soldCell.nameAr : soldCell.name;
+                } else {
+                    cell.classList.add('available');
+                    cell.onclick = () => openBuyModal();
+                    cell.title = currentLang === 'ar' ? `خانة #${i} - متاحة` : `Cell #${i} - Available`;
+                }
+                
+                grid.appendChild(cell);
+            }
+        }
+
+        function showCellInfo(cell) {
+            const modal = document.getElementById('cellModal');
+            const content = document.getElementById('cellContent');
+            const name = currentLang === 'ar' ? cell.nameAr : cell.name;
+            const story = currentLang === 'ar' ? cell.storyAr : cell.story;
+            const dateLabel = currentLang === 'ar' ? 'تاريخ الشراء' : 'Purchase Date';
+            const linkLabel = currentLang === 'ar' ? 'الرابط' : 'Link';
+            const storyLabel = currentLang === 'ar' ? 'القصة' : 'Story';
+            const cellLabel = currentLang === 'ar' ? 'خانة' : 'Cell';
+            
+            content.innerHTML = `
+                <div class="text-center mb-6">
+                    <div class="w-20 h-20 rounded-xl mx-auto mb-4" style="background-color: ${cell.color}"></div>
+                    <h3 class="text-2xl font-bold">${name}</h3>
+                    <p class="text-gray-400">${cellLabel} #${cell.id}</p>
+                </div>
+                <div class="space-y-4">
+                    <div class="bg-gray-800 p-4 rounded-xl">
+                        <div class="text-sm text-gray-400 mb-1">📅 ${dateLabel}</div>
+                        <div>${cell.date}</div>
+                    </div>
+                    ${cell.url ? `
+                    <div class="bg-gray-800 p-4 rounded-xl">
+                        <div class="text-sm text-gray-400 mb-1">🔗 ${linkLabel}</div>
+                        <a href="${cell.url}" target="_blank" class="text-pink-400 hover:underline break-all">${cell.url}</a>
+                    </div>
+                    ` : ''}
+                    <div class="bg-gray-800 p-4 rounded-xl">
+                        <div class="text-sm text-gray-400 mb-1">📖 ${storyLabel}</div>
+                        <div>${story}</div>
+                    </div>
+                </div>
+            `;
+            
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+        }
+
+        function openBuyModal() {
+            const modal = document.getElementById('buyModal');
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeBuyModal() {
+            const modal = document.getElementById('buyModal');
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+            document.body.style.overflow = '';
+        }
+
+        function closeCellModal() {
+            const modal = document.getElementById('cellModal');
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+        }
+
+        function closePaymentModal() {
+            const modal = document.getElementById('paymentModal');
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+            document.body.style.overflow = '';
+        }
+
+        function changeCellCount(delta) {
+            const input = document.getElementById('cellCount');
+            let value = parseInt(input.value) + delta;
+            if (value < 1) value = 1;
+            input.value = value;
+            updateTotal();
+        }
+
+        function updateTotal() {
+            const count = parseInt(document.getElementById('cellCount').value) || 1;
+            document.getElementById('totalAmount').textContent = count;
+        }
+
+        function showPaymentDetails() {
+            const count = parseInt(document.getElementById('cellCount').value) || 1;
+            document.getElementById('paymentAmount').textContent = count;
+            closeBuyModal();
+            const modal = document.getElementById('paymentModal');
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function copyToClipboard(elementId) {
+            const text = document.getElementById(elementId).textContent;
+            navigator.clipboard.writeText(text).then(() => {
+                showToast(currentLang === 'ar' ? 'تم النسخ!' : 'Copied!');
+            });
+        }
+
+        function showToast(message) {
+            const toast = document.getElementById('toast');
+            document.getElementById('toastMessage').textContent = message;
+            toast.classList.remove('translate-y-20', 'opacity-0');
+            setTimeout(() => {
+                toast.classList.add('translate-y-20', 'opacity-0');
+            }, 2000);
+        }
+
+        function toggleFAQ(button) {
+            const content = button.nextElementSibling;
+            const icon = button.querySelector('span:last-child');
+            
+            if (content.classList.contains('hidden')) {
+                content.classList.remove('hidden');
+                icon.textContent = '−';
+            } else {
+                content.classList.add('hidden');
+                icon.textContent = '+';
+            }
+        }
+
+        // Close modals on escape
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                closeBuyModal();
+                closeCellModal();
+                closePaymentModal();
+            }
+        });
+
+        // Close modals on backdrop click
+        document.querySelectorAll('#buyModal, #cellModal, #paymentModal').forEach(modal => {
+            modal.addEventListener('click', (e) => {
+                if (e.target === modal) {
+                    closeBuyModal();
+                    closeCellModal();
+                    closePaymentModal();
+                }
+            });
+        });
+
+        // Initialize
+        generateGrid();
+    </script>
+</body>
+</html>
