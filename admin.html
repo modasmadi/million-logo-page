@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Panel - Million Logo Page</title>
+    <title>Admin - Million Logo Page</title>
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
     
@@ -15,8 +15,7 @@
     <style>
         body { font-family: 'Poppins', sans-serif; }
         .status-pending { background: #f59e0b; color: #000; }
-        .status-approved { background: #10b981; }
-        .status-active { background: #3b82f6; }
+        .status-active { background: #10b981; }
         .status-rejected { background: #ef4444; }
         .loading-spinner {
             border: 3px solid #374151;
@@ -29,11 +28,6 @@
         @keyframes spin {
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
-        }
-        .proof-img {
-            max-width: 100%;
-            max-height: 400px;
-            object-fit: contain;
         }
     </style>
 </head>
@@ -50,11 +44,11 @@
             <div class="space-y-4">
                 <div>
                     <label class="block text-gray-400 mb-2">Email</label>
-                    <input type="email" id="adminEmail" class="w-full bg-gray-700 border border-gray-600 rounded-xl px-4 py-3 focus:border-pink-500 outline-none" placeholder="admin@example.com">
+                    <input type="email" id="adminEmail" class="w-full bg-gray-700 border border-gray-600 rounded-xl px-4 py-3 focus:border-pink-500 outline-none">
                 </div>
                 <div>
                     <label class="block text-gray-400 mb-2">Password</label>
-                    <input type="password" id="adminPassword" class="w-full bg-gray-700 border border-gray-600 rounded-xl px-4 py-3 focus:border-pink-500 outline-none" placeholder="••••••••" onkeypress="if(event.key==='Enter')login()">
+                    <input type="password" id="adminPassword" class="w-full bg-gray-700 border border-gray-600 rounded-xl px-4 py-3 focus:border-pink-500 outline-none" onkeypress="if(event.key==='Enter')login()">
                 </div>
                 <button onclick="login()" id="loginBtn" class="w-full bg-gradient-to-r from-pink-500 to-purple-600 py-4 rounded-xl font-bold text-lg hover:opacity-90 transition">
                     Login
@@ -74,7 +68,7 @@
                     <div class="w-10 h-10 bg-gradient-to-br from-pink-500 to-purple-600 rounded-lg flex items-center justify-center text-xl font-bold">M</div>
                     <div>
                         <h1 class="font-bold">Million Logo Admin</h1>
-                        <p class="text-sm text-gray-400">Manage orders and cells</p>
+                        <p class="text-sm text-gray-400">Manage cells & payments</p>
                     </div>
                 </div>
                 <div class="flex items-center gap-4">
@@ -93,82 +87,56 @@
             <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
                 <div class="bg-gray-800 p-6 rounded-xl border border-gray-700">
                     <div class="text-3xl font-bold text-yellow-400" id="statPending">0</div>
-                    <div class="text-gray-400">Pending Orders</div>
+                    <div class="text-gray-400">Pending</div>
                 </div>
                 <div class="bg-gray-800 p-6 rounded-xl border border-gray-700">
-                    <div class="text-3xl font-bold text-green-400" id="statApproved">0</div>
-                    <div class="text-gray-400">Approved</div>
+                    <div class="text-3xl font-bold text-green-400" id="statActive">0</div>
+                    <div class="text-gray-400">Active</div>
                 </div>
                 <div class="bg-gray-800 p-6 rounded-xl border border-gray-700">
-                    <div class="text-3xl font-bold text-blue-400" id="statActive">0</div>
-                    <div class="text-gray-400">Active (with logo)</div>
+                    <div class="text-3xl font-bold text-red-400" id="statRejected">0</div>
+                    <div class="text-gray-400">Rejected</div>
                 </div>
                 <div class="bg-gray-800 p-6 rounded-xl border border-gray-700">
                     <div class="text-3xl font-bold text-pink-400" id="statRevenue">0</div>
-                    <div class="text-gray-400">Total Revenue (JOD)</div>
+                    <div class="text-gray-400">Revenue (JOD)</div>
                 </div>
             </div>
 
             <!-- Tabs -->
-            <div class="flex gap-2 mb-6 overflow-x-auto">
-                <button onclick="filterOrders('all')" class="tab-btn bg-pink-500 px-6 py-2 rounded-lg font-bold whitespace-nowrap" data-tab="all">
-                    All Orders
+            <div class="flex gap-2 mb-6">
+                <button onclick="filterCells('all')" class="tab-btn bg-pink-500 px-6 py-2 rounded-lg font-bold" data-tab="all">
+                    All
                 </button>
-                <button onclick="filterOrders('pending')" class="tab-btn bg-gray-700 px-6 py-2 rounded-lg font-bold whitespace-nowrap" data-tab="pending">
+                <button onclick="filterCells('pending')" class="tab-btn bg-gray-700 px-6 py-2 rounded-lg font-bold" data-tab="pending">
                     ⏳ Pending
                 </button>
-                <button onclick="filterOrders('approved')" class="tab-btn bg-gray-700 px-6 py-2 rounded-lg font-bold whitespace-nowrap" data-tab="approved">
-                    ✓ Approved
-                </button>
-                <button onclick="filterOrders('active')" class="tab-btn bg-gray-700 px-6 py-2 rounded-lg font-bold whitespace-nowrap" data-tab="active">
-                    🎨 Active
-                </button>
-                <button onclick="filterOrders('rejected')" class="tab-btn bg-gray-700 px-6 py-2 rounded-lg font-bold whitespace-nowrap" data-tab="rejected">
-                    ✗ Rejected
+                <button onclick="filterCells('active')" class="tab-btn bg-gray-700 px-6 py-2 rounded-lg font-bold" data-tab="active">
+                    ✓ Active
                 </button>
             </div>
 
-            <!-- Orders Table -->
+            <!-- Cells List -->
             <div class="bg-gray-800 rounded-xl border border-gray-700 overflow-hidden">
-                <div class="overflow-x-auto">
-                    <table class="w-full">
-                        <thead class="bg-gray-700">
-                            <tr>
-                                <th class="text-left p-4">Order ID</th>
-                                <th class="text-left p-4">Customer</th>
-                                <th class="text-left p-4">Cells</th>
-                                <th class="text-left p-4">Amount</th>
-                                <th class="text-left p-4">Status</th>
-                                <th class="text-left p-4">Date</th>
-                                <th class="text-left p-4">Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody id="ordersTable">
-                        </tbody>
-                    </table>
-                </div>
+                <div id="cellsList" class="divide-y divide-gray-700"></div>
                 
-                <div id="noOrders" class="hidden p-12 text-center text-gray-500">
+                <div id="noCells" class="hidden p-12 text-center text-gray-500">
                     <div class="text-4xl mb-2">📭</div>
-                    <p>No orders found</p>
+                    <p>No cells found</p>
                 </div>
                 
-                <div id="loadingOrders" class="p-12 flex justify-center">
+                <div id="loading" class="p-12 flex justify-center">
                     <div class="loading-spinner"></div>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Order Details Modal -->
-    <div id="orderModal" class="fixed inset-0 bg-black/80 z-50 hidden items-center justify-center p-4 overflow-y-auto">
-        <div class="bg-gray-900 rounded-2xl max-w-3xl w-full p-6 border border-gray-700 relative my-8">
-            <button onclick="closeOrderModal()" class="absolute top-4 right-4 text-gray-400 hover:text-white text-2xl">&times;</button>
-            
-            <h2 class="text-2xl font-bold mb-6">Order Details</h2>
-            
-            <div id="orderDetails" class="space-y-6">
-            </div>
+    <!-- Cell Details Modal -->
+    <div id="cellModal" class="fixed inset-0 bg-black/80 z-50 hidden items-center justify-center p-4 overflow-y-auto">
+        <div class="bg-gray-900 rounded-2xl max-w-2xl w-full p-6 border border-gray-700 relative my-8">
+            <button onclick="closeCellModal()" class="absolute top-4 right-4 text-gray-400 hover:text-white text-2xl">&times;</button>
+            <div id="cellDetails"></div>
         </div>
     </div>
 
@@ -178,7 +146,7 @@
     </div>
 
     <script>
-        // ============ FIREBASE CONFIGURATION ============
+        // Firebase Config
         const firebaseConfig = {
             apiKey: "AIzaSyBiIITaYLK6P4soMF0ThGcGRY3LQ9dQDY4",
             authDomain: "million-logo-page.firebaseapp.com",
@@ -190,48 +158,28 @@
         };
 
         let db, auth;
+        firebase.initializeApp(firebaseConfig);
+        db = firebase.firestore();
+        auth = firebase.auth();
 
-        try {
-            firebase.initializeApp(firebaseConfig);
-            db = firebase.firestore();
-            auth = firebase.auth();
-            console.log("Firebase initialized");
-        } catch (e) {
-            console.log("Firebase error:", e);
-        }
-
-        let allOrders = [];
+        let allCells = [];
         let currentFilter = 'all';
 
-        // ============ AUTH ============
+        // ========== Auth ==========
         function login() {
             const email = document.getElementById('adminEmail').value;
             const password = document.getElementById('adminPassword').value;
             const btn = document.getElementById('loginBtn');
-            const errorDiv = document.getElementById('loginError');
-
-            if (!email || !password) {
-                errorDiv.textContent = 'Please enter email and password';
-                errorDiv.classList.remove('hidden');
-                return;
-            }
+            const error = document.getElementById('loginError');
 
             btn.innerHTML = '<div class="loading-spinner mx-auto" style="width:24px;height:24px;border-width:2px;"></div>';
-            errorDiv.classList.add('hidden');
+            error.classList.add('hidden');
 
             auth.signInWithEmailAndPassword(email, password)
-                .then(() => {
-                    showDashboard();
-                })
-                .catch(error => {
-                    let msg = 'Login failed';
-                    if (error.code === 'auth/user-not-found') msg = 'User not found';
-                    else if (error.code === 'auth/wrong-password') msg = 'Wrong password';
-                    else if (error.code === 'auth/invalid-email') msg = 'Invalid email';
-                    else if (error.code === 'auth/too-many-requests') msg = 'Too many attempts. Try later.';
-                    
-                    errorDiv.textContent = msg;
-                    errorDiv.classList.remove('hidden');
+                .then(() => showDashboard())
+                .catch(err => {
+                    error.textContent = err.message;
+                    error.classList.remove('hidden');
                     btn.innerHTML = 'Login';
                 });
         }
@@ -245,297 +193,190 @@
         function showDashboard() {
             document.getElementById('loginScreen').classList.add('hidden');
             document.getElementById('adminDashboard').classList.remove('hidden');
-            loadOrders();
+            loadCells();
         }
 
-        // ============ ORDERS ============
-        async function loadOrders() {
-            const table = document.getElementById('ordersTable');
-            const loading = document.getElementById('loadingOrders');
-            const noOrders = document.getElementById('noOrders');
-
+        // ========== Load Cells ==========
+        async function loadCells() {
             try {
-                const snapshot = await db.collection('orders').orderBy('createdAt', 'desc').get();
-                allOrders = snapshot.docs.map(doc => ({
-                    ...doc.data(),
-                    id: doc.id,
-                    createdAt: doc.data().createdAt?.toDate() || new Date()
-                }));
+                const snapshot = await db.collection('cells').orderBy('createdAt', 'desc').get();
+                allCells = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
                 
-                loading.classList.add('hidden');
+                document.getElementById('loading').classList.add('hidden');
                 updateStats();
-                renderOrders();
+                renderCells();
             } catch (error) {
-                console.error('Error loading orders:', error);
-                loading.innerHTML = '<p class="text-red-400">Error loading orders</p>';
+                console.error('Error:', error);
+                document.getElementById('loading').innerHTML = '<p class="text-red-400">Error loading</p>';
             }
         }
 
         function updateStats() {
-            const pending = allOrders.filter(o => o.status === 'pending').length;
-            const approved = allOrders.filter(o => o.status === 'approved').length;
-            const active = allOrders.filter(o => o.status === 'active').length;
-            const revenue = allOrders
-                .filter(o => ['approved', 'active'].includes(o.status))
-                .reduce((sum, o) => sum + (o.totalAmount || 0), 0);
+            const pending = allCells.filter(c => c.status === 'pending').length;
+            const active = allCells.filter(c => c.status === 'active').length;
+            const rejected = allCells.filter(c => c.status === 'rejected').length;
 
             document.getElementById('statPending').textContent = pending;
-            document.getElementById('statApproved').textContent = approved;
             document.getElementById('statActive').textContent = active;
-            document.getElementById('statRevenue').textContent = revenue;
+            document.getElementById('statRejected').textContent = rejected;
+            document.getElementById('statRevenue').textContent = active; // 1 JOD per cell
         }
 
-        function filterOrders(filter) {
+        function filterCells(filter) {
             currentFilter = filter;
-            
             document.querySelectorAll('.tab-btn').forEach(btn => {
                 btn.classList.remove('bg-pink-500');
                 btn.classList.add('bg-gray-700');
             });
             document.querySelector(`[data-tab="${filter}"]`).classList.remove('bg-gray-700');
             document.querySelector(`[data-tab="${filter}"]`).classList.add('bg-pink-500');
-            
-            renderOrders();
+            renderCells();
         }
 
-        function renderOrders() {
-            const table = document.getElementById('ordersTable');
-            const noOrders = document.getElementById('noOrders');
+        function renderCells() {
+            const list = document.getElementById('cellsList');
+            const noCells = document.getElementById('noCells');
             
-            let orders = allOrders;
+            let cells = allCells;
             if (currentFilter !== 'all') {
-                orders = allOrders.filter(o => o.status === currentFilter);
+                cells = allCells.filter(c => c.status === currentFilter);
             }
 
-            if (orders.length === 0) {
-                table.innerHTML = '';
-                noOrders.classList.remove('hidden');
+            if (cells.length === 0) {
+                list.innerHTML = '';
+                noCells.classList.remove('hidden');
                 return;
             }
 
-            noOrders.classList.add('hidden');
+            noCells.classList.add('hidden');
             
-            table.innerHTML = orders.map(order => `
-                <tr class="border-t border-gray-700 hover:bg-gray-700/50">
-                    <td class="p-4">
-                        <code class="text-pink-400 text-sm">${order.orderId}</code>
-                    </td>
-                    <td class="p-4">
-                        <div class="font-bold">${order.name || 'N/A'}</div>
-                        <div class="text-sm text-gray-400">${order.email || 'N/A'}</div>
-                    </td>
-                    <td class="p-4">
-                        <span class="bg-gray-700 px-2 py-1 rounded text-sm">${order.cellCount || 0} cells</span>
-                    </td>
-                    <td class="p-4 font-bold">${order.totalAmount || 0} JOD</td>
-                    <td class="p-4">
-                        <span class="status-${order.status} px-3 py-1 rounded-full text-sm font-bold capitalize">
-                            ${order.status}
-                        </span>
-                    </td>
-                    <td class="p-4 text-gray-400 text-sm">
-                        ${formatDate(order.createdAt)}
-                    </td>
-                    <td class="p-4">
-                        <div class="flex gap-2">
-                            <button onclick="viewOrder('${order.orderId}')" class="bg-gray-700 px-3 py-1 rounded hover:bg-gray-600 text-sm">
-                                View
-                            </button>
-                            ${order.status === 'pending' ? `
-                                <button onclick="approveOrder('${order.orderId}')" class="bg-green-600 px-3 py-1 rounded hover:bg-green-700 text-sm">
-                                    ✓
-                                </button>
-                                <button onclick="rejectOrder('${order.orderId}')" class="bg-red-600 px-3 py-1 rounded hover:bg-red-700 text-sm">
-                                    ✗
-                                </button>
-                            ` : ''}
-                        </div>
-                    </td>
-                </tr>
+            list.innerHTML = cells.map(cell => `
+                <div class="p-4 hover:bg-gray-700/50 flex items-center gap-4">
+                    <div class="w-12 h-12 rounded-lg overflow-hidden flex-shrink-0">
+                        ${cell.imageBase64 
+                            ? `<img src="${cell.imageBase64}" class="w-full h-full object-cover">`
+                            : `<div class="w-full h-full bg-gradient-to-br from-pink-500 to-purple-600 flex items-center justify-center">🎯</div>`
+                        }
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <div class="font-bold truncate">${cell.name || 'No name'}</div>
+                        <div class="text-sm text-gray-400">Cell #${cell.cellId} • ${cell.email || 'No email'}</div>
+                    </div>
+                    <span class="status-${cell.status} px-3 py-1 rounded-full text-sm font-bold capitalize flex-shrink-0">
+                        ${cell.status}
+                    </span>
+                    <div class="flex gap-2 flex-shrink-0">
+                        <button onclick="viewCell('${cell.id}')" class="bg-gray-700 px-3 py-1 rounded hover:bg-gray-600">View</button>
+                        ${cell.status === 'pending' ? `
+                            <button onclick="approveCell('${cell.id}')" class="bg-green-600 px-3 py-1 rounded hover:bg-green-700">✓</button>
+                            <button onclick="rejectCell('${cell.id}')" class="bg-red-600 px-3 py-1 rounded hover:bg-red-700">✗</button>
+                        ` : ''}
+                    </div>
+                </div>
             `).join('');
         }
 
-        function formatDate(date) {
-            if (!date) return 'N/A';
-            return new Date(date).toLocaleDateString('en-US', {
-                year: 'numeric',
-                month: 'short',
-                day: 'numeric',
-                hour: '2-digit',
-                minute: '2-digit'
-            });
-        }
+        // ========== Cell Actions ==========
+        function viewCell(id) {
+            const cell = allCells.find(c => c.id === id);
+            if (!cell) return;
 
-        function viewOrder(orderId) {
-            const order = allOrders.find(o => o.orderId === orderId);
-            if (!order) return;
+            const dateStr = cell.specialDate ? new Date(cell.specialDate).toLocaleDateString() : 'Not set';
+            const createdAt = cell.createdAt?.toDate?.()?.toLocaleString() || 'Unknown';
 
-            const modal = document.getElementById('orderModal');
-            const details = document.getElementById('orderDetails');
-
-            details.innerHTML = `
+            document.getElementById('cellDetails').innerHTML = `
+                <h2 class="text-2xl font-bold mb-6">Cell #${cell.cellId}</h2>
+                
                 <div class="grid md:grid-cols-2 gap-6">
                     <div>
-                        <h3 class="font-bold text-lg mb-4">Customer Info</h3>
-                        <div class="space-y-3">
-                            <div class="bg-gray-800 p-3 rounded-lg">
-                                <div class="text-sm text-gray-400">Name</div>
-                                <div class="font-bold">${order.name || 'N/A'}</div>
-                            </div>
-                            <div class="bg-gray-800 p-3 rounded-lg">
-                                <div class="text-sm text-gray-400">Email</div>
-                                <div>${order.email || 'N/A'}</div>
-                            </div>
-                            <div class="bg-gray-800 p-3 rounded-lg">
-                                <div class="text-sm text-gray-400">Phone</div>
-                                <div>${order.phone || 'N/A'}</div>
-                            </div>
-                            <div class="bg-gray-800 p-3 rounded-lg">
-                                <div class="text-sm text-gray-400">Website</div>
-                                <div>${order.url ? `<a href="${order.url}" target="_blank" class="text-pink-400 hover:underline">${order.url}</a>` : 'N/A'}</div>
-                            </div>
-                        </div>
-                    </div>
-                    <div>
-                        <h3 class="font-bold text-lg mb-4">Order Info</h3>
-                        <div class="space-y-3">
-                            <div class="bg-gray-800 p-3 rounded-lg">
-                                <div class="text-sm text-gray-400">Order ID</div>
-                                <div class="font-mono text-pink-400">${order.orderId}</div>
-                            </div>
-                            <div class="bg-gray-800 p-3 rounded-lg">
-                                <div class="text-sm text-gray-400">Cells</div>
-                                <div>${order.cellCount} cells</div>
-                                <div class="text-xs text-gray-500 mt-1">IDs: ${order.cells?.join(', ') || 'Random'}</div>
-                            </div>
-                            <div class="bg-gray-800 p-3 rounded-lg">
-                                <div class="text-sm text-gray-400">Amount</div>
-                                <div class="text-xl font-bold text-green-400">${order.totalAmount} JOD</div>
-                            </div>
-                            <div class="bg-gray-800 p-3 rounded-lg">
-                                <div class="text-sm text-gray-400">Status</div>
-                                <div><span class="status-${order.status} px-3 py-1 rounded-full text-sm font-bold capitalize">${order.status}</span></div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                ${order.story ? `
-                <div class="bg-gray-800 p-4 rounded-lg">
-                    <div class="text-sm text-gray-400 mb-2">Story</div>
-                    <div>${order.story}</div>
-                </div>
-                ` : ''}
-
-                <div class="grid md:grid-cols-2 gap-6">
-                    <div>
-                        <h3 class="font-bold text-lg mb-4">Payment Proof</h3>
-                        ${order.proofBase64 
-                            ? `<img src="${order.proofBase64}" class="proof-img rounded-lg border border-gray-700">`
-                            : '<p class="text-gray-500">No proof uploaded</p>'
+                        <h3 class="font-bold mb-4">Image</h3>
+                        ${cell.imageBase64 
+                            ? `<img src="${cell.imageBase64}" class="w-full max-w-[200px] rounded-xl border border-gray-700">`
+                            : '<p class="text-gray-500">No image</p>'
                         }
                     </div>
-                    ${order.logoBase64 ? `
-                    <div>
-                        <h3 class="font-bold text-lg mb-4">Uploaded Logo</h3>
-                        <img src="${order.logoBase64}" class="w-32 h-32 rounded-lg border border-gray-700 object-contain bg-white">
+                    <div class="space-y-3">
+                        <div class="bg-gray-800 p-3 rounded-lg">
+                            <div class="text-xs text-gray-400">Name</div>
+                            <div class="font-bold">${cell.name || 'N/A'}</div>
+                        </div>
+                        <div class="bg-gray-800 p-3 rounded-lg">
+                            <div class="text-xs text-gray-400">Email</div>
+                            <div>${cell.email || 'N/A'}</div>
+                        </div>
+                        <div class="bg-gray-800 p-3 rounded-lg">
+                            <div class="text-xs text-gray-400">Special Date</div>
+                            <div>${dateStr}</div>
+                        </div>
+                        <div class="bg-gray-800 p-3 rounded-lg">
+                            <div class="text-xs text-gray-400">Website</div>
+                            <div>${cell.website ? `<a href="${cell.website}" target="_blank" class="text-pink-400 hover:underline">${cell.website}</a>` : 'N/A'}</div>
+                        </div>
+                        <div class="bg-gray-800 p-3 rounded-lg">
+                            <div class="text-xs text-gray-400">Status</div>
+                            <div><span class="status-${cell.status} px-3 py-1 rounded-full text-sm font-bold capitalize">${cell.status}</span></div>
+                        </div>
+                        <div class="bg-gray-800 p-3 rounded-lg">
+                            <div class="text-xs text-gray-400">Submitted</div>
+                            <div class="text-sm">${createdAt}</div>
+                        </div>
                     </div>
-                    ` : ''}
                 </div>
 
-                ${order.status === 'pending' ? `
-                <div class="flex gap-4 pt-4 border-t border-gray-700">
-                    <button onclick="approveOrder('${order.orderId}'); closeOrderModal();" class="flex-1 bg-green-600 py-3 rounded-xl font-bold hover:bg-green-700 transition">
-                        ✓ Approve Order
-                    </button>
-                    <button onclick="rejectOrder('${order.orderId}'); closeOrderModal();" class="flex-1 bg-red-600 py-3 rounded-xl font-bold hover:bg-red-700 transition">
-                        ✗ Reject Order
-                    </button>
+                ${cell.story ? `
+                <div class="bg-gray-800 p-4 rounded-lg mt-6">
+                    <div class="text-xs text-gray-400 mb-2">Story</div>
+                    <div>${cell.story}</div>
                 </div>
                 ` : ''}
 
-                ${order.status === 'approved' ? `
-                <div class="bg-green-500/10 border border-green-500/30 p-4 rounded-lg">
-                    <h4 class="font-bold text-green-400 mb-2">📧 Send this to customer:</h4>
-                    <div class="bg-gray-800 p-3 rounded text-sm">
-                        <p>Your order has been approved!</p>
-                        <p class="mt-2">Activation Code: <strong class="text-pink-400">${order.orderId}</strong></p>
-                        <p class="mt-2">Go to the website and click "I have a code" to upload your logo.</p>
-                    </div>
-                    <button onclick="copyText('Your Million Logo order is approved! Use code: ${order.orderId} to upload your logo at https://modasmadi.github.io/million-logo-page/')" class="mt-3 bg-green-600 px-4 py-2 rounded font-bold hover:bg-green-700">
-                        📋 Copy Message
+                ${cell.status === 'pending' ? `
+                <div class="flex gap-4 mt-6">
+                    <button onclick="approveCell('${cell.id}'); closeCellModal();" class="flex-1 bg-green-600 py-3 rounded-xl font-bold hover:bg-green-700">
+                        ✓ Approve
                     </button>
-                </div>
-                ` : ''}
-
-                ${order.status === 'rejected' && order.rejectionReason ? `
-                <div class="bg-red-500/20 border border-red-500/50 p-4 rounded-lg">
-                    <div class="text-sm text-red-400 mb-1">Rejection Reason</div>
-                    <div>${order.rejectionReason}</div>
+                    <button onclick="rejectCell('${cell.id}'); closeCellModal();" class="flex-1 bg-red-600 py-3 rounded-xl font-bold hover:bg-red-700">
+                        ✗ Reject
+                    </button>
                 </div>
                 ` : ''}
             `;
 
-            modal.classList.remove('hidden');
-            modal.classList.add('flex');
+            document.getElementById('cellModal').classList.remove('hidden');
+            document.getElementById('cellModal').classList.add('flex');
         }
 
-        function closeOrderModal() {
-            document.getElementById('orderModal').classList.add('hidden');
-            document.getElementById('orderModal').classList.remove('flex');
+        function closeCellModal() {
+            document.getElementById('cellModal').classList.add('hidden');
+            document.getElementById('cellModal').classList.remove('flex');
         }
 
-        async function approveOrder(orderId) {
+        async function approveCell(id) {
             try {
-                await db.collection('orders').doc(orderId).update({
-                    status: 'approved',
-                    approvedAt: firebase.firestore.FieldValue.serverTimestamp()
-                });
-                
-                // Update local
-                const order = allOrders.find(o => o.orderId === orderId);
-                if (order) order.status = 'approved';
-                
+                await db.collection('cells').doc(id).update({ status: 'active' });
+                const cell = allCells.find(c => c.id === id);
+                if (cell) cell.status = 'active';
                 updateStats();
-                renderOrders();
-                showToast(`✓ Order ${orderId} approved!`);
+                renderCells();
+                showToast('Cell approved! ✓');
             } catch (error) {
-                console.error('Error:', error);
-                showToast('Error approving order');
+                showToast('Error approving cell');
             }
         }
 
-        async function rejectOrder(orderId) {
-            const reason = prompt('Rejection reason:');
-            if (!reason) return;
-
+        async function rejectCell(id) {
+            if (!confirm('Are you sure you want to reject this cell?')) return;
+            
             try {
-                await db.collection('orders').doc(orderId).update({
-                    status: 'rejected',
-                    rejectionReason: reason,
-                    rejectedAt: firebase.firestore.FieldValue.serverTimestamp()
-                });
-                
-                // Update local
-                const order = allOrders.find(o => o.orderId === orderId);
-                if (order) {
-                    order.status = 'rejected';
-                    order.rejectionReason = reason;
-                }
-                
+                await db.collection('cells').doc(id).update({ status: 'rejected' });
+                const cell = allCells.find(c => c.id === id);
+                if (cell) cell.status = 'rejected';
                 updateStats();
-                renderOrders();
-                showToast(`Order ${orderId} rejected`);
+                renderCells();
+                showToast('Cell rejected');
             } catch (error) {
-                console.error('Error:', error);
-                showToast('Error rejecting order');
+                showToast('Error rejecting cell');
             }
-        }
-
-        function copyText(text) {
-            navigator.clipboard.writeText(text).then(() => {
-                showToast('Copied!');
-            });
         }
 
         function showToast(message) {
@@ -544,23 +385,21 @@
             toast.classList.remove('translate-y-20', 'opacity-0');
             setTimeout(() => {
                 toast.classList.add('translate-y-20', 'opacity-0');
-            }, 4000);
+            }, 3000);
         }
 
         // Close modal on escape
         document.addEventListener('keydown', (e) => {
-            if (e.key === 'Escape') closeOrderModal();
+            if (e.key === 'Escape') closeCellModal();
         });
 
-        document.getElementById('orderModal').addEventListener('click', (e) => {
-            if (e.target.id === 'orderModal') closeOrderModal();
+        document.getElementById('cellModal').addEventListener('click', (e) => {
+            if (e.target.id === 'cellModal') closeCellModal();
         });
 
         // Check auth state
         auth.onAuthStateChanged(user => {
-            if (user) {
-                showDashboard();
-            }
+            if (user) showDashboard();
         });
     </script>
 </body>
