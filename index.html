@@ -1,0 +1,1183 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Million Logo Page - First Arabic Digital Advertising Museum</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800;900&family=Poppins:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-storage-compat.js"></script>
+    
+    <style>
+        :root {
+            --font-en: 'Poppins', sans-serif;
+            --font-ar: 'Tajawal', sans-serif;
+        }
+        body { font-family: var(--font-en); }
+        body[dir="rtl"] { font-family: var(--font-ar); }
+        
+        .grid-cell {
+            width: 10px;
+            height: 10px;
+            transition: all 0.2s;
+            position: relative;
+        }
+        .grid-cell:hover {
+            transform: scale(3);
+            z-index: 100;
+            box-shadow: 0 0 20px rgba(0,0,0,0.5);
+        }
+        .grid-cell.sold { cursor: pointer; }
+        .grid-cell.available {
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            cursor: pointer;
+        }
+        .grid-cell.available:hover {
+            background: linear-gradient(135deg, #e94560 0%, #ff6b6b 100%);
+        }
+        .grid-cell.selected {
+            background: linear-gradient(135deg, #10b981 0%, #34d399 100%) !important;
+            box-shadow: 0 0 10px #10b981;
+        }
+        .grid-cell.pending {
+            background: linear-gradient(135deg, #f59e0b 0%, #fbbf24 100%);
+            animation: pendingPulse 1.5s infinite;
+        }
+        @keyframes pendingPulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.6; }
+        }
+        .glow {
+            animation: glow 2s ease-in-out infinite alternate;
+        }
+        @keyframes glow {
+            from { box-shadow: 0 0 20px #e94560, 0 0 40px #e94560; }
+            to { box-shadow: 0 0 30px #ff6b6b, 0 0 60px #ff6b6b; }
+        }
+        .counter-gradient {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        .hero-bg {
+            background: linear-gradient(135deg, #0f0c29 0%, #302b63 50%, #24243e 100%);
+        }
+        .scroll-smooth { scroll-behavior: smooth; }
+        .pioneer-badge {
+            background: linear-gradient(135deg, #f5af19 0%, #f12711 100%);
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+        .payment-card {
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            border: 1px solid rgba(233, 69, 96, 0.3);
+        }
+        .payment-card:hover {
+            border-color: rgba(233, 69, 96, 0.6);
+        }
+        .step-indicator {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+        .step-dot {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            transition: all 0.3s;
+        }
+        .step-dot.active {
+            background: linear-gradient(135deg, #e94560, #ff6b6b);
+        }
+        .step-dot.completed {
+            background: #10b981;
+        }
+        .step-dot.inactive {
+            background: #374151;
+        }
+        .upload-zone {
+            border: 2px dashed #4b5563;
+            transition: all 0.3s;
+        }
+        .upload-zone:hover, .upload-zone.dragover {
+            border-color: #e94560;
+            background: rgba(233, 69, 96, 0.1);
+        }
+        .logo-preview {
+            max-width: 200px;
+            max-height: 200px;
+            object-fit: contain;
+        }
+        .loading-spinner {
+            border: 3px solid #374151;
+            border-top: 3px solid #e94560;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body class="bg-gray-900 text-white scroll-smooth">
+    <!-- Language Toggle & Navigation -->
+    <nav class="fixed top-0 w-full bg-gray-900/95 backdrop-blur-sm z-50 border-b border-gray-800">
+        <div class="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 bg-gradient-to-br from-pink-500 to-purple-600 rounded-lg flex items-center justify-center text-xl font-bold">M</div>
+                <span class="text-xl font-bold hidden sm:block" data-en="Million Logo" data-ar="الصفحة المليون">Million Logo</span>
+            </div>
+            <div class="hidden md:flex gap-6">
+                <a href="#home" class="hover:text-pink-400 transition" data-en="Home" data-ar="الرئيسية">Home</a>
+                <a href="#grid" class="hover:text-pink-400 transition" data-en="Grid" data-ar="الشبكة">Grid</a>
+                <a href="#how" class="hover:text-pink-400 transition" data-en="How to Buy" data-ar="كيف تشتري">How to Buy</a>
+                <a href="#charter" class="hover:text-pink-400 transition" data-en="Charter" data-ar="الميثاق">Charter</a>
+            </div>
+            <div class="flex items-center gap-3">
+                <button onclick="toggleLanguage()" class="flex items-center gap-2 bg-gray-800 px-3 py-2 rounded-lg hover:bg-gray-700 transition text-sm">
+                    <span id="langIcon">🇬🇧</span>
+                    <span id="langText">EN</span>
+                </button>
+                <button onclick="openBuyModal()" class="bg-gradient-to-r from-pink-500 to-purple-600 px-4 sm:px-6 py-2 rounded-full font-bold hover:opacity-90 transition glow text-sm sm:text-base">
+                    <span data-en="Buy Now" data-ar="احجز الآن">Buy Now</span>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section id="home" class="hero-bg min-h-screen flex items-center justify-center pt-20">
+        <div class="max-w-6xl mx-auto px-4 text-center">
+            <div class="mb-8">
+                <span class="bg-pink-500/20 text-pink-400 px-4 py-2 rounded-full text-sm font-bold">
+                    🚀 <span data-en="First Arabic Digital Advertising Museum" data-ar="أول متحف إعلاني رقمي عربي">First Arabic Digital Advertising Museum</span>
+                </span>
+            </div>
+            <h1 class="text-4xl sm:text-5xl md:text-7xl font-black mb-6 leading-tight">
+                <span data-en="The Million" data-ar="الصفحة">The Million</span>
+                <span class="text-transparent bg-clip-text bg-gradient-to-r from-pink-500 to-purple-500" data-en="Logo Page" data-ar="المليون شعار">Logo Page</span>
+            </h1>
+            <p class="text-lg sm:text-xl md:text-2xl text-gray-300 mb-8 max-w-3xl mx-auto">
+                <span data-en="One million cells. 1 JOD per cell. Digital history that lasts forever." data-ar="مليون خانة. دينار واحد للخانة. تاريخ رقمي لا يُمحى.">One million cells. 1 JOD per cell. Digital history that lasts forever.</span>
+                <br>
+                <span class="text-pink-400" data-en="Be part of history before it fills up!" data-ar="كن جزءاً من التاريخ قبل أن يمتلئ!">Be part of history before it fills up!</span>
+            </p>
+            
+            <!-- Live Counter -->
+            <div class="flex flex-wrap justify-center gap-4 sm:gap-6 mb-12">
+                <div class="counter-gradient px-6 sm:px-8 py-4 sm:py-6 rounded-2xl text-center min-w-[120px] sm:min-w-[150px]">
+                    <div class="text-3xl sm:text-4xl font-black" id="soldCount">0</div>
+                    <div class="text-xs sm:text-sm opacity-80" data-en="Cells Sold" data-ar="خانة مباعة">Cells Sold</div>
+                </div>
+                <div class="bg-gray-800 px-6 sm:px-8 py-4 sm:py-6 rounded-2xl text-center min-w-[120px] sm:min-w-[150px]">
+                    <div class="text-3xl sm:text-4xl font-black text-green-400" id="availableCount">1,000,000</div>
+                    <div class="text-xs sm:text-sm opacity-80" data-en="Available" data-ar="متاحة">Available</div>
+                </div>
+                <div class="bg-gray-800 px-6 sm:px-8 py-4 sm:py-6 rounded-2xl text-center min-w-[120px] sm:min-w-[150px]">
+                    <div class="text-3xl sm:text-4xl font-black text-yellow-400">1 JOD</div>
+                    <div class="text-xs sm:text-sm opacity-80" data-en="Fixed Forever" data-ar="سعر ثابت للأبد">Fixed Forever</div>
+                </div>
+            </div>
+
+            <div class="flex flex-wrap justify-center gap-4">
+                <button onclick="openBuyModal()" class="bg-gradient-to-r from-pink-500 to-purple-600 px-8 sm:px-10 py-3 sm:py-4 rounded-full font-bold text-base sm:text-lg hover:opacity-90 transition transform hover:scale-105 glow">
+                    🎯 <span data-en="Claim Your Cell Now" data-ar="احجز خانتك الآن">Claim Your Cell Now</span>
+                </button>
+                <a href="#grid" class="border-2 border-gray-600 px-8 sm:px-10 py-3 sm:py-4 rounded-full font-bold text-base sm:text-lg hover:border-pink-500 transition">
+                    <span data-en="Explore Grid" data-ar="استكشف الشبكة">Explore Grid</span>
+                </a>
+            </div>
+
+            <div class="mt-16 animate-bounce">
+                <svg class="w-6 h-6 mx-auto text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3"></path>
+                </svg>
+            </div>
+        </div>
+    </section>
+
+    <!-- Story Section -->
+    <section class="py-20 bg-gray-800/50">
+        <div class="max-w-6xl mx-auto px-4">
+            <div class="grid md:grid-cols-2 gap-12 items-center">
+                <div>
+                    <h2 class="text-3xl sm:text-4xl font-black mb-6">
+                        <span data-en="The Story Behind 📖" data-ar="القصة وراء الفكرة 📖">The Story Behind 📖</span>
+                    </h2>
+                    <p class="text-gray-300 text-lg leading-relaxed mb-6" data-en="In 2005, a young man named Alex Tew created 'The Million Dollar Homepage' and sold one million pixels at $1 each. He made a million dollars!" data-ar="في عام 2005، شاب يدعى Alex Tew أنشأ موقع 'The Million Dollar Homepage' وباع مليون بكسل بدولار واحد لكل بكسل. ربح مليون دولار!">
+                        In 2005, a young man named Alex Tew created "The Million Dollar Homepage" and sold one million pixels at $1 each. He made a million dollars!
+                    </p>
+                    <p class="text-gray-300 text-lg leading-relaxed mb-6">
+                        <span data-en="Today, we revive this idea with an Arabic twist. Not just an ad site, but a" data-ar="اليوم، نعيد إحياء هذه الفكرة بنكهة عربية. ليس فقط موقع إعلانات، بل">Today, we revive this idea with an Arabic twist. Not just an ad site, but a</span>
+                        <span class="text-pink-400 font-bold" data-en="digital museum" data-ar="متحف رقمي">digital museum</span>
+                        <span data-en="documenting a moment in time." data-ar="يوثق لحظة من الزمن.">documenting a moment in time.</span>
+                    </p>
+                </div>
+                <div class="bg-gradient-to-br from-purple-900/50 to-pink-900/50 p-8 rounded-3xl border border-purple-500/30">
+                    <h3 class="text-2xl font-bold mb-6 text-center">
+                        🏆 <span data-en="What You Get" data-ar="ماذا تحصل؟">What You Get</span>
+                    </h3>
+                    <ul class="space-y-4">
+                        <li class="flex items-start gap-3">
+                            <span class="text-2xl">✅</span>
+                            <span data-en="Permanent cell that never gets deleted" data-ar="خانة دائمة لا تُحذف أبداً">Permanent cell that never gets deleted</span>
+                        </li>
+                        <li class="flex items-start gap-3">
+                            <span class="text-2xl">✅</span>
+                            <span data-en="Link to your website or page" data-ar="رابط لموقعك أو صفحتك">Link to your website or page</span>
+                        </li>
+                        <li class="flex items-start gap-3">
+                            <span class="text-2xl">✅</span>
+                            <span data-en="Unique serial number" data-ar="رقم تسلسلي فريد">Unique serial number</span>
+                        </li>
+                        <li class="flex items-start gap-3">
+                            <span class="text-2xl">✅</span>
+                            <span data-en="Date & time documentation" data-ar="توثيق التاريخ والوقت">Date & time documentation</span>
+                        </li>
+                        <li class="flex items-start gap-3">
+                            <span class="text-2xl">✅</span>
+                            <span data-en="Your own story page" data-ar="صفحة قصة خاصة بك">Your own story page</span>
+                        </li>
+                        <li class="flex items-start gap-3">
+                            <span class="text-2xl">✅</span>
+                            <span data-en="Part of Arabic digital history" data-ar="جزء من التاريخ الرقمي العربي">Part of Arabic digital history</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Grid Section -->
+    <section id="grid" class="py-20">
+        <div class="max-w-7xl mx-auto px-4">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl sm:text-4xl font-black mb-4">
+                    <span data-en="The Million Grid 🎨" data-ar="الشبكة المليونية 🎨">The Million Grid 🎨</span>
+                </h2>
+                <p class="text-gray-400" data-en="Click on empty cells to select them, then click 'Buy Selected'" data-ar="اضغط على الخانات الفارغة لتحديدها، ثم اضغط 'شراء المحددة'">Click on empty cells to select them, then click "Buy Selected"</p>
+                
+                <!-- Selection Info -->
+                <div id="selectionInfo" class="hidden mt-4 bg-green-500/20 border border-green-500/50 rounded-xl p-4 inline-block">
+                    <span data-en="Selected:" data-ar="المحددة:">Selected:</span>
+                    <span id="selectedCount" class="font-bold text-green-400">0</span>
+                    <span data-en="cells" data-ar="خانة">cells</span>
+                    <span class="mx-2">|</span>
+                    <span data-en="Total:" data-ar="المجموع:">Total:</span>
+                    <span id="selectedTotal" class="font-bold text-green-400">0</span> JOD
+                    <button onclick="openBuyModalWithSelected()" class="ml-4 bg-green-500 px-4 py-1 rounded-lg font-bold hover:bg-green-600 transition">
+                        <span data-en="Buy Selected" data-ar="شراء المحددة">Buy Selected</span>
+                    </button>
+                    <button onclick="clearSelection()" class="ml-2 bg-gray-600 px-4 py-1 rounded-lg hover:bg-gray-700 transition">
+                        <span data-en="Clear" data-ar="إلغاء">Clear</span>
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Grid Legend -->
+            <div class="flex justify-center gap-6 mb-6 flex-wrap">
+                <div class="flex items-center gap-2">
+                    <div class="w-4 h-4 bg-gradient-to-br from-gray-700 to-gray-800 rounded"></div>
+                    <span class="text-gray-400 text-sm" data-en="Available" data-ar="متاحة">Available</span>
+                </div>
+                <div class="flex items-center gap-2">
+                    <div class="w-4 h-4 bg-gradient-to-br from-green-500 to-green-400 rounded"></div>
+                    <span class="text-gray-400 text-sm" data-en="Selected" data-ar="محددة">Selected</span>
+                </div>
+                <div class="flex items-center gap-2">
+                    <div class="w-4 h-4 bg-gradient-to-br from-yellow-500 to-yellow-400 rounded"></div>
+                    <span class="text-gray-400 text-sm" data-en="Pending" data-ar="قيد الانتظار">Pending</span>
+                </div>
+                <div class="flex items-center gap-2">
+                    <div class="w-4 h-4 bg-gradient-to-br from-pink-500 to-purple-500 rounded"></div>
+                    <span class="text-gray-400 text-sm" data-en="Sold" data-ar="مباعة">Sold</span>
+                </div>
+            </div>
+            
+            <!-- Grid Container -->
+            <div class="bg-gray-800 p-4 rounded-2xl overflow-auto max-h-[600px] border border-gray-700">
+                <div id="pixelGrid" class="flex flex-wrap" style="width: 1000px;"></div>
+            </div>
+        </div>
+    </section>
+
+    <!-- How to Buy -->
+    <section id="how" class="py-20 bg-gray-800/50">
+        <div class="max-w-5xl mx-auto px-4">
+            <h2 class="text-3xl sm:text-4xl font-black text-center mb-16">
+                <span data-en="How to Claim Your Cell? 🛒" data-ar="كيف تحجز خانتك؟ 🛒">How to Claim Your Cell? 🛒</span>
+            </h2>
+            <div class="grid sm:grid-cols-2 md:grid-cols-4 gap-8">
+                <div class="text-center">
+                    <div class="w-16 sm:w-20 h-16 sm:h-20 bg-gradient-to-br from-pink-500 to-purple-600 rounded-full flex items-center justify-center mx-auto mb-4 text-2xl sm:text-3xl font-bold">1</div>
+                    <h3 class="text-lg sm:text-xl font-bold mb-2" data-en="Select Cells" data-ar="اختر الخانات">Select Cells</h3>
+                    <p class="text-gray-400 text-sm sm:text-base" data-en="Click on empty cells in the grid to select them" data-ar="اضغط على الخانات الفارغة في الشبكة لتحديدها">Click on empty cells in the grid to select them</p>
+                </div>
+                <div class="text-center">
+                    <div class="w-16 sm:w-20 h-16 sm:h-20 bg-gradient-to-br from-pink-500 to-purple-600 rounded-full flex items-center justify-center mx-auto mb-4 text-2xl sm:text-3xl font-bold">2</div>
+                    <h3 class="text-lg sm:text-xl font-bold mb-2" data-en="Fill Your Info" data-ar="أدخل بياناتك">Fill Your Info</h3>
+                    <p class="text-gray-400 text-sm sm:text-base" data-en="Enter your name, email, website and story" data-ar="أدخل اسمك، إيميلك، موقعك وقصتك">Enter your name, email, website and story</p>
+                </div>
+                <div class="text-center">
+                    <div class="w-16 sm:w-20 h-16 sm:h-20 bg-gradient-to-br from-pink-500 to-purple-600 rounded-full flex items-center justify-center mx-auto mb-4 text-2xl sm:text-3xl font-bold">3</div>
+                    <h3 class="text-lg sm:text-xl font-bold mb-2" data-en="Pay & Upload Proof" data-ar="ادفع وارفع الإثبات">Pay & Upload Proof</h3>
+                    <p class="text-gray-400 text-sm sm:text-base" data-en="Pay via CliQ/Bank and upload payment screenshot" data-ar="ادفع عبر كليك/البنك وارفع صورة الحوالة">Pay via CliQ/Bank and upload payment screenshot</p>
+                </div>
+                <div class="text-center">
+                    <div class="w-16 sm:w-20 h-16 sm:h-20 bg-gradient-to-br from-pink-500 to-purple-600 rounded-full flex items-center justify-center mx-auto mb-4 text-2xl sm:text-3xl font-bold">4</div>
+                    <h3 class="text-lg sm:text-xl font-bold mb-2" data-en="Upload Your Logo!" data-ar="ارفع شعارك!">Upload Your Logo!</h3>
+                    <p class="text-gray-400 text-sm sm:text-base" data-en="Once confirmed, upload your logo and you're live!" data-ar="بعد التأكيد، ارفع شعارك وستظهر مباشرة!">Once confirmed, upload your logo and you're live!</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Charter Section -->
+    <section id="charter" class="py-20">
+        <div class="max-w-4xl mx-auto px-4">
+            <div class="bg-gradient-to-br from-purple-900/30 to-pink-900/30 p-8 sm:p-10 rounded-3xl border border-purple-500/30">
+                <h2 class="text-3xl sm:text-4xl font-black text-center mb-4">
+                    📜 <span data-en="The Million Page Charter" data-ar="ميثاق الصفحة المليون">The Million Page Charter</span>
+                </h2>
+                <p class="text-center text-gray-400 mb-10" data-en="Official pledge that won't be broken" data-ar="تعهد رسمي لا يُخل">Official pledge that won't be broken</p>
+                
+                <div class="grid sm:grid-cols-2 gap-6">
+                    <div class="bg-gray-800/50 p-6 rounded-xl border border-gray-700">
+                        <h3 class="text-xl font-bold mb-3 flex items-center gap-2">
+                            <span class="text-2xl">💰</span> 
+                            <span data-en="Fixed Price" data-ar="السعر ثابت">Fixed Price</span>
+                        </h3>
+                        <p class="text-gray-400" data-en="1 JOD per cell. From day one until the last cell. No increases." data-ar="دينار واحد للخانة. من أول يوم حتى آخر خانة. لا زيادات.">1 JOD per cell. From day one until the last cell. No increases.</p>
+                    </div>
+                    <div class="bg-gray-800/50 p-6 rounded-xl border border-gray-700">
+                        <h3 class="text-xl font-bold mb-3 flex items-center gap-2">
+                            <span class="text-2xl">🔒</span> 
+                            <span data-en="No Deletion" data-ar="لا حذف">No Deletion</span>
+                        </h3>
+                        <p class="text-gray-400" data-en="Sold cells will never be deleted. No matter what." data-ar="الخانات المباعة لن تُحذف أبداً. مهما حصل.">Sold cells will never be deleted. No matter what.</p>
+                    </div>
+                    <div class="bg-gray-800/50 p-6 rounded-xl border border-gray-700">
+                        <h3 class="text-xl font-bold mb-3 flex items-center gap-2">
+                            <span class="text-2xl">✏️</span> 
+                            <span data-en="No Modification" data-ar="لا تعديل">No Modification</span>
+                        </h3>
+                        <p class="text-gray-400" data-en="Stories and logos stay as they are. True archive." data-ar="القصص والشعارات تبقى كما هي. أرشيف حقيقي.">Stories and logos stay as they are. True archive.</p>
+                    </div>
+                    <div class="bg-gray-800/50 p-6 rounded-xl border border-gray-700">
+                        <h3 class="text-xl font-bold mb-3 flex items-center gap-2">
+                            <span class="text-2xl">🏛️</span> 
+                            <span data-en="Museum Forever" data-ar="متحف للأبد">Museum Forever</span>
+                        </h3>
+                        <p class="text-gray-400" data-en="After filling up, the site becomes a permanent digital museum." data-ar="بعد الامتلاء، الموقع يتحول لمتحف رقمي دائم.">After filling up, the site becomes a permanent digital museum.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA Section -->
+    <section class="py-20 bg-gradient-to-r from-pink-600 to-purple-600">
+        <div class="max-w-4xl mx-auto px-4 text-center">
+            <h2 class="text-3xl sm:text-4xl font-black mb-6">
+                <span data-en="Ready to be part of history?" data-ar="جاهز تكون جزء من التاريخ؟">Ready to be part of history?</span>
+            </h2>
+            <p class="text-lg sm:text-xl opacity-90 mb-8" data-en="Just 1 JOD. One cell. Eternal memory." data-ar="دينار واحد فقط. خانة واحدة. ذكرى دائمة.">Just 1 JOD. One cell. Eternal memory.</p>
+            <button onclick="openBuyModal()" class="bg-white text-purple-600 px-10 sm:px-12 py-3 sm:py-4 rounded-full font-bold text-lg sm:text-xl hover:bg-gray-100 transition transform hover:scale-105">
+                <span data-en="Claim Your Cell Now 🚀" data-ar="احجز خانتك الآن 🚀">Claim Your Cell Now 🚀</span>
+            </button>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="py-10 bg-gray-900 border-t border-gray-800">
+        <div class="max-w-6xl mx-auto px-4">
+            <div class="flex flex-wrap justify-between items-center gap-6">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 bg-gradient-to-br from-pink-500 to-purple-600 rounded-lg flex items-center justify-center text-xl font-bold">M</div>
+                    <span class="text-xl font-bold" data-en="Million Logo Page" data-ar="الصفحة المليون شعار">Million Logo Page</span>
+                </div>
+                <div class="text-gray-400">
+                    <span data-en="Made with ❤️ in Jordan" data-ar="صنع بـ ❤️ في الأردن">Made with ❤️ in Jordan</span>
+                </div>
+                <div class="flex gap-4">
+                    <a href="https://wa.me/962775925599" target="_blank" class="text-gray-400 hover:text-green-400">WhatsApp</a>
+                    <a href="mailto:ezz2006m@gmail.com" class="text-gray-400 hover:text-pink-400">Email</a>
+                </div>
+            </div>
+            <div class="mt-6 pt-6 border-t border-gray-800 text-center text-gray-500 text-sm">
+                © 2024 Million Logo Page. <span data-en="All rights reserved." data-ar="جميع الحقوق محفوظة.">All rights reserved.</span>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Main Buy Modal - Multi Step -->
+    <div id="buyModal" class="fixed inset-0 bg-black/80 z-50 hidden items-center justify-center p-4 overflow-y-auto">
+        <div class="bg-gray-900 rounded-3xl max-w-2xl w-full p-6 sm:p-8 border border-gray-700 relative my-8">
+            <button onclick="closeBuyModal()" class="absolute top-4 right-4 text-gray-400 hover:text-white text-2xl">&times;</button>
+            
+            <!-- Step Indicator -->
+            <div class="step-indicator">
+                <div class="step-dot active" id="step1Dot">1</div>
+                <div class="w-12 h-1 bg-gray-700 self-center"></div>
+                <div class="step-dot inactive" id="step2Dot">2</div>
+                <div class="w-12 h-1 bg-gray-700 self-center"></div>
+                <div class="step-dot inactive" id="step3Dot">3</div>
+                <div class="w-12 h-1 bg-gray-700 self-center"></div>
+                <div class="step-dot inactive" id="step4Dot">4</div>
+            </div>
+
+            <!-- Step 1: Select Cells -->
+            <div id="step1" class="step-content">
+                <h3 class="text-2xl font-black mb-6 text-center">
+                    <span data-en="Step 1: Select Your Cells" data-ar="الخطوة 1: اختر خاناتك">Step 1: Select Your Cells</span>
+                </h3>
+                
+                <div class="bg-gray-800 p-4 rounded-xl mb-6">
+                    <label class="block text-gray-400 mb-2" data-en="Number of Cells" data-ar="عدد الخانات">Number of Cells</label>
+                    <div class="flex items-center gap-4">
+                        <button onclick="changeCellCount(-1)" class="w-12 h-12 bg-gray-700 rounded-lg hover:bg-gray-600 transition text-2xl">-</button>
+                        <input type="number" id="cellCount" value="1" min="1" class="flex-1 bg-gray-700 border border-gray-600 rounded-xl px-4 py-3 focus:border-pink-500 outline-none text-center text-2xl font-bold" onchange="updateTotal()">
+                        <button onclick="changeCellCount(1)" class="w-12 h-12 bg-gray-700 rounded-lg hover:bg-gray-600 transition text-2xl">+</button>
+                    </div>
+                </div>
+
+                <div class="bg-pink-500/10 border border-pink-500/30 p-4 rounded-xl mb-6">
+                    <div class="flex justify-between items-center">
+                        <span class="text-lg" data-en="Total Price:" data-ar="المجموع:">Total Price:</span>
+                        <span class="text-3xl font-black text-pink-400"><span id="totalPrice">1</span> JOD</span>
+                    </div>
+                </div>
+
+                <div id="selectedCellsInfo" class="hidden bg-green-500/10 border border-green-500/30 p-4 rounded-xl mb-6">
+                    <div class="text-sm text-gray-400 mb-2" data-en="Selected Cell IDs:" data-ar="أرقام الخانات المحددة:">Selected Cell IDs:</div>
+                    <div id="selectedCellsList" class="text-green-400 font-mono text-sm"></div>
+                </div>
+
+                <button onclick="goToStep(2)" class="w-full bg-gradient-to-r from-pink-500 to-purple-600 py-4 rounded-xl font-bold text-lg hover:opacity-90 transition">
+                    <span data-en="Next: Your Information ➜" data-ar="التالي: بياناتك ➜">Next: Your Information ➜</span>
+                </button>
+            </div>
+
+            <!-- Step 2: User Info -->
+            <div id="step2" class="step-content hidden">
+                <h3 class="text-2xl font-black mb-6 text-center">
+                    <span data-en="Step 2: Your Information" data-ar="الخطوة 2: بياناتك">Step 2: Your Information</span>
+                </h3>
+                
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-gray-400 mb-2" data-en="Name or Company *" data-ar="الاسم أو الشركة *">Name or Company *</label>
+                        <input type="text" id="buyName" required class="w-full bg-gray-800 border border-gray-700 rounded-xl px-4 py-3 focus:border-pink-500 outline-none" placeholder="Your name or company name">
+                    </div>
+                    <div>
+                        <label class="block text-gray-400 mb-2" data-en="Email *" data-ar="البريد الإلكتروني *">Email *</label>
+                        <input type="email" id="buyEmail" required class="w-full bg-gray-800 border border-gray-700 rounded-xl px-4 py-3 focus:border-pink-500 outline-none" placeholder="email@example.com">
+                    </div>
+                    <div>
+                        <label class="block text-gray-400 mb-2" data-en="Phone (WhatsApp)" data-ar="رقم الهاتف (واتساب)">Phone (WhatsApp)</label>
+                        <input type="tel" id="buyPhone" class="w-full bg-gray-800 border border-gray-700 rounded-xl px-4 py-3 focus:border-pink-500 outline-none" placeholder="+962...">
+                    </div>
+                    <div>
+                        <label class="block text-gray-400 mb-2" data-en="Website URL (Optional)" data-ar="رابط موقعك (اختياري)">Website URL (Optional)</label>
+                        <input type="url" id="buyUrl" class="w-full bg-gray-800 border border-gray-700 rounded-xl px-4 py-3 focus:border-pink-500 outline-none" placeholder="https://yoursite.com">
+                    </div>
+                    <div>
+                        <label class="block text-gray-400 mb-2" data-en="Your Story (Why are you joining?)" data-ar="قصتك (لماذا تنضم؟)">Your Story (Why are you joining?)</label>
+                        <textarea id="buyStory" class="w-full bg-gray-800 border border-gray-700 rounded-xl px-4 py-3 focus:border-pink-500 outline-none h-24" placeholder="Share your story..."></textarea>
+                    </div>
+                </div>
+
+                <div class="flex gap-4 mt-6">
+                    <button onclick="goToStep(1)" class="flex-1 bg-gray-700 py-4 rounded-xl font-bold text-lg hover:bg-gray-600 transition">
+                        <span data-en="← Back" data-ar="← رجوع">← Back</span>
+                    </button>
+                    <button onclick="goToStep(3)" class="flex-1 bg-gradient-to-r from-pink-500 to-purple-600 py-4 rounded-xl font-bold text-lg hover:opacity-90 transition">
+                        <span data-en="Next: Payment ➜" data-ar="التالي: الدفع ➜">Next: Payment ➜</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Step 3: Payment -->
+            <div id="step3" class="step-content hidden">
+                <h3 class="text-2xl font-black mb-6 text-center">
+                    <span data-en="Step 3: Payment" data-ar="الخطوة 3: الدفع">Step 3: Payment</span>
+                </h3>
+
+                <div class="bg-pink-500/10 border border-pink-500/30 p-4 rounded-xl mb-6 text-center">
+                    <div class="text-sm text-gray-400 mb-1" data-en="Amount to Pay" data-ar="المبلغ المطلوب">Amount to Pay</div>
+                    <div class="text-4xl font-black text-pink-400"><span id="paymentTotal">1</span> JOD</div>
+                </div>
+
+                <div class="grid md:grid-cols-2 gap-4 mb-6">
+                    <!-- CliQ -->
+                    <div class="bg-gray-800 p-4 rounded-xl border border-gray-700">
+                        <div class="flex items-center gap-2 mb-3">
+                            <span class="text-2xl">📱</span>
+                            <span class="font-bold">CliQ</span>
+                        </div>
+                        <div class="text-sm text-gray-400">Alias:</div>
+                        <div class="flex items-center justify-between">
+                            <span class="text-xl font-mono text-pink-400">FVG</span>
+                            <button onclick="copyText('FVG')" class="bg-gray-700 px-3 py-1 rounded text-sm hover:bg-gray-600">Copy</button>
+                        </div>
+                    </div>
+                    <!-- Bank -->
+                    <div class="bg-gray-800 p-4 rounded-xl border border-gray-700">
+                        <div class="flex items-center gap-2 mb-3">
+                            <span class="text-2xl">🏦</span>
+                            <span class="font-bold">Bank Transfer</span>
+                        </div>
+                        <div class="text-sm text-gray-400">IBAN:</div>
+                        <div class="text-xs font-mono text-pink-400 break-all">JO29ARAB9000030022415300368500</div>
+                        <button onclick="copyText('JO29ARAB9000030022415300368500')" class="mt-2 bg-gray-700 px-3 py-1 rounded text-sm hover:bg-gray-600 w-full">Copy IBAN</button>
+                    </div>
+                </div>
+
+                <div class="bg-gray-800 p-4 rounded-xl mb-4">
+                    <div class="text-sm text-gray-400 mb-2">Account Name:</div>
+                    <div class="font-semibold">MAHMOUD OMAR HEIDER AL SMADI</div>
+                </div>
+
+                <!-- Payment Proof Upload -->
+                <div class="mb-6">
+                    <label class="block text-gray-400 mb-2" data-en="Upload Payment Screenshot *" data-ar="ارفع صورة إثبات الدفع *">Upload Payment Screenshot *</label>
+                    <div id="proofUploadZone" class="upload-zone rounded-xl p-8 text-center cursor-pointer" onclick="document.getElementById('proofInput').click()">
+                        <input type="file" id="proofInput" accept="image/*" class="hidden" onchange="handleProofUpload(this)">
+                        <div id="proofPreview" class="hidden">
+                            <img id="proofImage" class="logo-preview mx-auto mb-2">
+                            <p class="text-green-400">✓ <span data-en="Payment proof uploaded" data-ar="تم رفع إثبات الدفع">Payment proof uploaded</span></p>
+                        </div>
+                        <div id="proofPlaceholder">
+                            <div class="text-4xl mb-2">📤</div>
+                            <p class="text-gray-400" data-en="Click to upload payment screenshot" data-ar="اضغط لرفع صورة الحوالة">Click to upload payment screenshot</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flex gap-4">
+                    <button onclick="goToStep(2)" class="flex-1 bg-gray-700 py-4 rounded-xl font-bold text-lg hover:bg-gray-600 transition">
+                        <span data-en="← Back" data-ar="← رجوع">← Back</span>
+                    </button>
+                    <button onclick="submitOrder()" id="submitBtn" class="flex-1 bg-gradient-to-r from-green-500 to-emerald-600 py-4 rounded-xl font-bold text-lg hover:opacity-90 transition">
+                        <span data-en="Submit Order ✓" data-ar="إرسال الطلب ✓">Submit Order ✓</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Step 4: Confirmation & Logo Upload -->
+            <div id="step4" class="step-content hidden">
+                <div class="text-center">
+                    <div class="text-6xl mb-4">🎉</div>
+                    <h3 class="text-2xl font-black mb-4">
+                        <span data-en="Order Submitted!" data-ar="تم إرسال الطلب!">Order Submitted!</span>
+                    </h3>
+                    <p class="text-gray-400 mb-6" data-en="Your order is being reviewed. You'll receive a confirmation email with your access code once payment is verified." data-ar="طلبك قيد المراجعة. ستستلم إيميل تأكيد مع كود الوصول بعد التحقق من الدفع.">
+                        Your order is being reviewed. You'll receive a confirmation email with your access code once payment is verified.
+                    </p>
+                    
+                    <div class="bg-gray-800 p-6 rounded-xl mb-6">
+                        <div class="text-sm text-gray-400 mb-2" data-en="Your Order ID" data-ar="رقم طلبك">Your Order ID</div>
+                        <div class="text-2xl font-mono text-pink-400" id="orderIdDisplay">---</div>
+                    </div>
+
+                    <div class="bg-yellow-500/10 border border-yellow-500/30 p-4 rounded-xl mb-6 text-left">
+                        <h4 class="font-bold text-yellow-400 mb-2">📋 <span data-en="What's Next?" data-ar="ما التالي؟">What's Next?</span></h4>
+                        <ul class="text-sm text-gray-300 space-y-2">
+                            <li data-en="1. We verify your payment (usually within 24 hours)" data-ar="1. نتحقق من دفعتك (عادة خلال 24 ساعة)">1. We verify your payment (usually within 24 hours)</li>
+                            <li data-en="2. You receive an email with your activation code" data-ar="2. تستلم إيميل مع كود التفعيل">2. You receive an email with your activation code</li>
+                            <li data-en="3. Use the code to upload your logo" data-ar="3. استخدم الكود لرفع شعارك">3. Use the code to upload your logo</li>
+                            <li data-en="4. Your logo goes live on the grid!" data-ar="4. شعارك يظهر على الشبكة!">4. Your logo goes live on the grid!</li>
+                        </ul>
+                    </div>
+
+                    <button onclick="closeBuyModal()" class="w-full bg-gradient-to-r from-pink-500 to-purple-600 py-4 rounded-xl font-bold text-lg hover:opacity-90 transition">
+                        <span data-en="Done ✓" data-ar="تم ✓">Done ✓</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Activate & Upload Logo Modal -->
+    <div id="activateModal" class="fixed inset-0 bg-black/80 z-50 hidden items-center justify-center p-4 overflow-y-auto">
+        <div class="bg-gray-900 rounded-3xl max-w-lg w-full p-6 sm:p-8 border border-gray-700 relative my-8">
+            <button onclick="closeActivateModal()" class="absolute top-4 right-4 text-gray-400 hover:text-white text-2xl">&times;</button>
+            
+            <h3 class="text-2xl font-black mb-6 text-center">
+                🎨 <span data-en="Upload Your Logo" data-ar="ارفع شعارك">Upload Your Logo</span>
+            </h3>
+
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-gray-400 mb-2" data-en="Activation Code" data-ar="كود التفعيل">Activation Code</label>
+                    <input type="text" id="activationCode" class="w-full bg-gray-800 border border-gray-700 rounded-xl px-4 py-3 focus:border-pink-500 outline-none font-mono text-center text-xl" placeholder="Enter your code">
+                </div>
+
+                <div id="logoUploadSection" class="hidden">
+                    <label class="block text-gray-400 mb-2" data-en="Your Logo" data-ar="شعارك">Your Logo</label>
+                    <div id="logoUploadZone" class="upload-zone rounded-xl p-8 text-center cursor-pointer" onclick="document.getElementById('logoInput').click()">
+                        <input type="file" id="logoInput" accept="image/*" class="hidden" onchange="handleLogoUpload(this)">
+                        <div id="logoPreview" class="hidden">
+                            <img id="logoImage" class="logo-preview mx-auto mb-2">
+                            <p class="text-green-400">✓ <span data-en="Logo ready" data-ar="الشعار جاهز">Logo ready</span></p>
+                        </div>
+                        <div id="logoPlaceholder">
+                            <div class="text-4xl mb-2">🖼️</div>
+                            <p class="text-gray-400" data-en="Click to upload your logo" data-ar="اضغط لرفع شعارك">Click to upload your logo</p>
+                            <p class="text-xs text-gray-500 mt-1">PNG, JPG, GIF (max 2MB)</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <button onclick="verifyAndUpload()" id="activateBtn" class="w-full mt-6 bg-gradient-to-r from-pink-500 to-purple-600 py-4 rounded-xl font-bold text-lg hover:opacity-90 transition">
+                <span data-en="Verify Code" data-ar="تحقق من الكود">Verify Code</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- Cell Info Modal -->
+    <div id="cellModal" class="fixed inset-0 bg-black/80 z-50 hidden items-center justify-center p-4">
+        <div class="bg-gray-900 rounded-3xl max-w-md w-full p-6 sm:p-8 border border-gray-700 relative">
+            <button onclick="closeCellModal()" class="absolute top-4 right-4 text-gray-400 hover:text-white text-2xl">&times;</button>
+            <div id="cellContent"></div>
+        </div>
+    </div>
+
+    <!-- Toast -->
+    <div id="toast" class="fixed bottom-4 right-4 bg-green-600 text-white px-6 py-3 rounded-xl shadow-lg transform translate-y-20 opacity-0 transition-all duration-300 z-50">
+        <span id="toastMessage">Copied!</span>
+    </div>
+
+    <!-- Floating Activate Button -->
+    <button onclick="openActivateModal()" class="fixed bottom-6 left-6 bg-gradient-to-r from-green-500 to-emerald-600 px-6 py-3 rounded-full font-bold shadow-lg hover:opacity-90 transition z-40 flex items-center gap-2">
+        🔑 <span data-en="I have a code" data-ar="عندي كود">I have a code</span>
+    </button>
+
+    <script>
+        // ============ FIREBASE CONFIGURATION ============
+        const firebaseConfig = {
+            apiKey: "AIzaSyBiIITaYLK6P4soMF0ThGcGRY3LQ9dQDY4",
+            authDomain: "million-logo-page.firebaseapp.com",
+            projectId: "million-logo-page",
+            storageBucket: "million-logo-page.firebasestorage.app",
+            messagingSenderId: "224485393689",
+            appId: "1:224485393689:web:85fa9f811071995cbef188",
+            measurementId: "G-TR1VSBG8LT"
+        };
+
+        // Initialize Firebase (will work once you add real config)
+        let db, storage;
+        try {
+            firebase.initializeApp(firebaseConfig);
+            db = firebase.firestore();
+            storage = firebase.storage();
+            console.log("Firebase initialized");
+        } catch (e) {
+            console.log("Firebase not configured yet - running in demo mode");
+        }
+
+        // ============ LANGUAGE SYSTEM ============
+        let currentLang = 'en';
+
+        function toggleLanguage() {
+            currentLang = currentLang === 'en' ? 'ar' : 'en';
+            updateLanguage();
+        }
+
+        function updateLanguage() {
+            const html = document.documentElement;
+            const body = document.body;
+            
+            if (currentLang === 'ar') {
+                html.lang = 'ar';
+                html.dir = 'rtl';
+                body.dir = 'rtl';
+                document.getElementById('langIcon').textContent = '🇯🇴';
+                document.getElementById('langText').textContent = 'ع';
+            } else {
+                html.lang = 'en';
+                html.dir = 'ltr';
+                body.dir = 'ltr';
+                document.getElementById('langIcon').textContent = '🇬🇧';
+                document.getElementById('langText').textContent = 'EN';
+            }
+
+            document.querySelectorAll('[data-en]').forEach(el => {
+                const text = el.getAttribute(`data-${currentLang}`);
+                if (text) el.textContent = text;
+            });
+        }
+
+        // ============ GRID SYSTEM ============
+        let selectedCells = [];
+        let soldCellsData = {};
+        let pendingCellsData = {};
+
+        // Demo data for sold cells
+        const demoCells = [
+            { id: 45, name: "Horizon Tech", color: "#3B82F6", url: "https://example.com", date: "2024-01-15", story: "Part of history!" },
+            { id: 46, name: "Horizon Tech", color: "#3B82F6", url: "https://example.com", date: "2024-01-15", story: "Part of history!" },
+            { id: 145, name: "Horizon Tech", color: "#3B82F6", url: "https://example.com", date: "2024-01-15", story: "Part of history!" },
+            { id: 146, name: "Horizon Tech", color: "#3B82F6", url: "https://example.com", date: "2024-01-15", story: "Part of history!" },
+            { id: 500, name: "Mohammad", color: "#EF4444", date: "2024-01-14", story: "Birthday gift!" },
+            { id: 1234, name: "Al-Karam Restaurant", color: "#10B981", url: "https://alkaramrest.com", date: "2024-01-13" },
+        ];
+
+        function generateGrid() {
+            const grid = document.getElementById('pixelGrid');
+            grid.innerHTML = '';
+            const totalCells = 10000;
+            
+            // Convert demo to lookup
+            demoCells.forEach(c => soldCellsData[c.id] = c);
+            
+            for (let i = 0; i < totalCells; i++) {
+                const cell = document.createElement('div');
+                cell.className = 'grid-cell';
+                cell.dataset.id = i;
+                
+                if (soldCellsData[i]) {
+                    cell.classList.add('sold');
+                    cell.style.backgroundColor = soldCellsData[i].color;
+                    if (soldCellsData[i].logoUrl) {
+                        cell.style.backgroundImage = `url(${soldCellsData[i].logoUrl})`;
+                        cell.style.backgroundSize = 'cover';
+                    }
+                    cell.onclick = () => showCellInfo(soldCellsData[i]);
+                    cell.title = soldCellsData[i].name;
+                } else if (pendingCellsData[i]) {
+                    cell.classList.add('pending');
+                    cell.title = 'Pending verification';
+                } else {
+                    cell.classList.add('available');
+                    cell.onclick = () => toggleCellSelection(i, cell);
+                    cell.title = `Cell #${i}`;
+                }
+                
+                grid.appendChild(cell);
+            }
+            
+            updateCounters();
+        }
+
+        function toggleCellSelection(id, cell) {
+            const index = selectedCells.indexOf(id);
+            if (index > -1) {
+                selectedCells.splice(index, 1);
+                cell.classList.remove('selected');
+            } else {
+                selectedCells.push(id);
+                cell.classList.add('selected');
+            }
+            updateSelectionInfo();
+        }
+
+        function updateSelectionInfo() {
+            const info = document.getElementById('selectionInfo');
+            const countEl = document.getElementById('selectedCount');
+            const totalEl = document.getElementById('selectedTotal');
+            const listEl = document.getElementById('selectedCellsList');
+            const cellsInfo = document.getElementById('selectedCellsInfo');
+            
+            if (selectedCells.length > 0) {
+                info.classList.remove('hidden');
+                countEl.textContent = selectedCells.length;
+                totalEl.textContent = selectedCells.length;
+                
+                // Update modal
+                document.getElementById('cellCount').value = selectedCells.length;
+                updateTotal();
+                
+                // Show selected cells in modal
+                cellsInfo.classList.remove('hidden');
+                listEl.textContent = selectedCells.sort((a,b) => a-b).join(', ');
+            } else {
+                info.classList.add('hidden');
+                cellsInfo.classList.add('hidden');
+            }
+        }
+
+        function clearSelection() {
+            selectedCells.forEach(id => {
+                const cell = document.querySelector(`.grid-cell[data-id="${id}"]`);
+                if (cell) cell.classList.remove('selected');
+            });
+            selectedCells = [];
+            updateSelectionInfo();
+        }
+
+        function updateCounters() {
+            const soldCount = Object.keys(soldCellsData).length;
+            const pendingCount = Object.keys(pendingCellsData).length;
+            document.getElementById('soldCount').textContent = soldCount.toLocaleString();
+            document.getElementById('availableCount').textContent = (1000000 - soldCount - pendingCount).toLocaleString();
+        }
+
+        function showCellInfo(cell) {
+            const modal = document.getElementById('cellModal');
+            const content = document.getElementById('cellContent');
+            
+            content.innerHTML = `
+                <div class="text-center mb-6">
+                    ${cell.logoUrl 
+                        ? `<img src="${cell.logoUrl}" class="w-24 h-24 rounded-xl mx-auto mb-4 object-cover">`
+                        : `<div class="w-24 h-24 rounded-xl mx-auto mb-4" style="background-color: ${cell.color}"></div>`
+                    }
+                    <h3 class="text-2xl font-bold">${cell.name}</h3>
+                    <p class="text-gray-400">Cell #${cell.id}</p>
+                </div>
+                <div class="space-y-4">
+                    <div class="bg-gray-800 p-4 rounded-xl">
+                        <div class="text-sm text-gray-400 mb-1">📅 Date</div>
+                        <div>${cell.date}</div>
+                    </div>
+                    ${cell.url ? `
+                    <div class="bg-gray-800 p-4 rounded-xl">
+                        <div class="text-sm text-gray-400 mb-1">🔗 Website</div>
+                        <a href="${cell.url}" target="_blank" class="text-pink-400 hover:underline break-all">${cell.url}</a>
+                    </div>` : ''}
+                    ${cell.story ? `
+                    <div class="bg-gray-800 p-4 rounded-xl">
+                        <div class="text-sm text-gray-400 mb-1">📖 Story</div>
+                        <div>${cell.story}</div>
+                    </div>` : ''}
+                </div>
+            `;
+            
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+        }
+
+        // ============ MODAL SYSTEM ============
+        let currentStep = 1;
+        let proofFile = null;
+        let logoFile = null;
+
+        function openBuyModal() {
+            document.getElementById('buyModal').classList.remove('hidden');
+            document.getElementById('buyModal').classList.add('flex');
+            document.body.style.overflow = 'hidden';
+            goToStep(1);
+        }
+
+        function openBuyModalWithSelected() {
+            openBuyModal();
+        }
+
+        function closeBuyModal() {
+            document.getElementById('buyModal').classList.add('hidden');
+            document.getElementById('buyModal').classList.remove('flex');
+            document.body.style.overflow = '';
+            // Reset
+            currentStep = 1;
+            proofFile = null;
+            document.getElementById('proofPreview').classList.add('hidden');
+            document.getElementById('proofPlaceholder').classList.remove('hidden');
+        }
+
+        function goToStep(step) {
+            // Validation
+            if (step === 2) {
+                const count = parseInt(document.getElementById('cellCount').value);
+                if (count < 1) {
+                    showToast('Please select at least 1 cell');
+                    return;
+                }
+            }
+            if (step === 3) {
+                const name = document.getElementById('buyName').value.trim();
+                const email = document.getElementById('buyEmail').value.trim();
+                if (!name || !email) {
+                    showToast('Please fill name and email');
+                    return;
+                }
+                if (!email.includes('@')) {
+                    showToast('Please enter a valid email');
+                    return;
+                }
+            }
+
+            currentStep = step;
+            
+            // Hide all steps
+            document.querySelectorAll('.step-content').forEach(s => s.classList.add('hidden'));
+            document.getElementById(`step${step}`).classList.remove('hidden');
+            
+            // Update dots
+            for (let i = 1; i <= 4; i++) {
+                const dot = document.getElementById(`step${i}Dot`);
+                dot.classList.remove('active', 'completed', 'inactive');
+                if (i < step) dot.classList.add('completed');
+                else if (i === step) dot.classList.add('active');
+                else dot.classList.add('inactive');
+            }
+            
+            // Update payment total
+            if (step === 3) {
+                document.getElementById('paymentTotal').textContent = document.getElementById('totalPrice').textContent;
+            }
+        }
+
+        function changeCellCount(delta) {
+            const input = document.getElementById('cellCount');
+            let value = parseInt(input.value) + delta;
+            if (value < 1) value = 1;
+            input.value = value;
+            updateTotal();
+        }
+
+        function updateTotal() {
+            const count = parseInt(document.getElementById('cellCount').value) || 1;
+            document.getElementById('totalPrice').textContent = count;
+        }
+
+        function handleProofUpload(input) {
+            if (input.files && input.files[0]) {
+                proofFile = input.files[0];
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    document.getElementById('proofImage').src = e.target.result;
+                    document.getElementById('proofPreview').classList.remove('hidden');
+                    document.getElementById('proofPlaceholder').classList.add('hidden');
+                };
+                reader.readAsDataURL(proofFile);
+            }
+        }
+
+        async function submitOrder() {
+            const name = document.getElementById('buyName').value.trim();
+            const email = document.getElementById('buyEmail').value.trim();
+            const phone = document.getElementById('buyPhone').value.trim();
+            const url = document.getElementById('buyUrl').value.trim();
+            const story = document.getElementById('buyStory').value.trim();
+            const cellCount = parseInt(document.getElementById('cellCount').value);
+            
+            if (!proofFile) {
+                showToast('Please upload payment proof');
+                return;
+            }
+
+            const btn = document.getElementById('submitBtn');
+            btn.innerHTML = '<div class="loading-spinner mx-auto"></div>';
+            btn.disabled = true;
+
+            // Generate order ID
+            const orderId = 'ORD-' + Date.now().toString(36).toUpperCase();
+            
+            try {
+                // If Firebase is configured, save to database
+                if (db && storage) {
+                    // Upload proof image
+                    const proofRef = storage.ref().child(`proofs/${orderId}_${proofFile.name}`);
+                    await proofRef.put(proofFile);
+                    const proofUrl = await proofRef.getDownloadURL();
+                    
+                    // Save order
+                    await db.collection('orders').doc(orderId).set({
+                        orderId,
+                        name,
+                        email,
+                        phone,
+                        url,
+                        story,
+                        cellCount,
+                        cells: selectedCells.length > 0 ? selectedCells : [],
+                        proofUrl,
+                        status: 'pending',
+                        createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+                        totalAmount: cellCount
+                    });
+                }
+                
+                // Show confirmation
+                document.getElementById('orderIdDisplay').textContent = orderId;
+                goToStep(4);
+                
+                // Clear selection
+                clearSelection();
+                
+            } catch (error) {
+                console.error('Error:', error);
+                // Still show success in demo mode
+                document.getElementById('orderIdDisplay').textContent = orderId;
+                goToStep(4);
+                clearSelection();
+            }
+
+            btn.innerHTML = '<span data-en="Submit Order ✓" data-ar="إرسال الطلب ✓">Submit Order ✓</span>';
+            btn.disabled = false;
+        }
+
+        // ============ ACTIVATION SYSTEM ============
+        function openActivateModal() {
+            document.getElementById('activateModal').classList.remove('hidden');
+            document.getElementById('activateModal').classList.add('flex');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeActivateModal() {
+            document.getElementById('activateModal').classList.add('hidden');
+            document.getElementById('activateModal').classList.remove('flex');
+            document.body.style.overflow = '';
+        }
+
+        function handleLogoUpload(input) {
+            if (input.files && input.files[0]) {
+                logoFile = input.files[0];
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    document.getElementById('logoImage').src = e.target.result;
+                    document.getElementById('logoPreview').classList.remove('hidden');
+                    document.getElementById('logoPlaceholder').classList.add('hidden');
+                };
+                reader.readAsDataURL(logoFile);
+            }
+        }
+
+        async function verifyAndUpload() {
+            const code = document.getElementById('activationCode').value.trim();
+            const btn = document.getElementById('activateBtn');
+            const logoSection = document.getElementById('logoUploadSection');
+            
+            if (!code) {
+                showToast('Please enter your activation code');
+                return;
+            }
+
+            // If logo section is visible, upload logo
+            if (!logoSection.classList.contains('hidden')) {
+                if (!logoFile) {
+                    showToast('Please upload your logo');
+                    return;
+                }
+
+                btn.innerHTML = '<div class="loading-spinner mx-auto"></div>';
+                btn.disabled = true;
+
+                try {
+                    if (db && storage) {
+                        // Get order
+                        const orderDoc = await db.collection('orders').doc(code).get();
+                        if (orderDoc.exists && orderDoc.data().status === 'approved') {
+                            // Upload logo
+                            const logoRef = storage.ref().child(`logos/${code}_${logoFile.name}`);
+                            await logoRef.put(logoFile);
+                            const logoUrl = await logoRef.getDownloadURL();
+                            
+                            // Update order
+                            await db.collection('orders').doc(code).update({
+                                logoUrl,
+                                status: 'active'
+                            });
+                            
+                            showToast('🎉 Logo uploaded successfully!');
+                            closeActivateModal();
+                            generateGrid(); // Refresh grid
+                        }
+                    } else {
+                        // Demo mode
+                        showToast('🎉 Logo uploaded! (Demo mode)');
+                        closeActivateModal();
+                    }
+                } catch (error) {
+                    showToast('Error uploading logo');
+                    console.error(error);
+                }
+
+                btn.innerHTML = '<span>Upload Logo ✓</span>';
+                btn.disabled = false;
+                return;
+            }
+
+            // Verify code first
+            btn.innerHTML = '<div class="loading-spinner mx-auto"></div>';
+            btn.disabled = true;
+
+            try {
+                if (db) {
+                    const orderDoc = await db.collection('orders').doc(code).get();
+                    if (orderDoc.exists && orderDoc.data().status === 'approved') {
+                        logoSection.classList.remove('hidden');
+                        btn.innerHTML = '<span>Upload Logo ✓</span>';
+                        showToast('✓ Code verified! Now upload your logo');
+                    } else if (orderDoc.exists && orderDoc.data().status === 'pending') {
+                        showToast('Your order is still being reviewed');
+                        btn.innerHTML = '<span>Verify Code</span>';
+                    } else {
+                        showToast('Invalid code');
+                        btn.innerHTML = '<span>Verify Code</span>';
+                    }
+                } else {
+                    // Demo mode - show logo upload
+                    logoSection.classList.remove('hidden');
+                    btn.innerHTML = '<span>Upload Logo ✓</span>';
+                    showToast('✓ Code verified! (Demo mode)');
+                }
+            } catch (error) {
+                showToast('Error verifying code');
+                btn.innerHTML = '<span>Verify Code</span>';
+            }
+
+            btn.disabled = false;
+        }
+
+        // ============ UTILITIES ============
+        function closeCellModal() {
+            document.getElementById('cellModal').classList.add('hidden');
+            document.getElementById('cellModal').classList.remove('flex');
+        }
+
+        function copyText(text) {
+            navigator.clipboard.writeText(text).then(() => {
+                showToast('Copied!');
+            });
+        }
+
+        function showToast(message) {
+            const toast = document.getElementById('toast');
+            document.getElementById('toastMessage').textContent = message;
+            toast.classList.remove('translate-y-20', 'opacity-0');
+            setTimeout(() => {
+                toast.classList.add('translate-y-20', 'opacity-0');
+            }, 3000);
+        }
+
+        // Close modals on escape
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                closeBuyModal();
+                closeCellModal();
+                closeActivateModal();
+            }
+        });
+
+        // Close modals on backdrop click
+        ['buyModal', 'cellModal', 'activateModal'].forEach(id => {
+            document.getElementById(id).addEventListener('click', (e) => {
+                if (e.target.id === id) {
+                    closeBuyModal();
+                    closeCellModal();
+                    closeActivateModal();
+                }
+            });
+        });
+
+        // Initialize
+        generateGrid();
+    </script>
+</body>
+</html>

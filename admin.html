@@ -1,0 +1,618 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Panel - Million Logo Page</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-storage-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+    
+    <style>
+        body { font-family: 'Poppins', sans-serif; }
+        .status-pending { background: #f59e0b; }
+        .status-approved { background: #10b981; }
+        .status-active { background: #3b82f6; }
+        .status-rejected { background: #ef4444; }
+        .loading-spinner {
+            border: 3px solid #374151;
+            border-top: 3px solid #e94560;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body class="bg-gray-900 text-white min-h-screen">
+    <!-- Login Screen -->
+    <div id="loginScreen" class="min-h-screen flex items-center justify-center p-4">
+        <div class="bg-gray-800 p-8 rounded-2xl max-w-md w-full border border-gray-700">
+            <div class="text-center mb-8">
+                <div class="w-16 h-16 bg-gradient-to-br from-pink-500 to-purple-600 rounded-xl flex items-center justify-center text-3xl font-bold mx-auto mb-4">M</div>
+                <h1 class="text-2xl font-bold">Admin Panel</h1>
+                <p class="text-gray-400">Million Logo Page</p>
+            </div>
+            
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-gray-400 mb-2">Email</label>
+                    <input type="email" id="adminEmail" class="w-full bg-gray-700 border border-gray-600 rounded-xl px-4 py-3 focus:border-pink-500 outline-none" placeholder="admin@example.com">
+                </div>
+                <div>
+                    <label class="block text-gray-400 mb-2">Password</label>
+                    <input type="password" id="adminPassword" class="w-full bg-gray-700 border border-gray-600 rounded-xl px-4 py-3 focus:border-pink-500 outline-none" placeholder="••••••••">
+                </div>
+                <button onclick="login()" id="loginBtn" class="w-full bg-gradient-to-r from-pink-500 to-purple-600 py-4 rounded-xl font-bold text-lg hover:opacity-90 transition">
+                    Login
+                </button>
+            </div>
+            
+            <div id="loginError" class="hidden mt-4 bg-red-500/20 border border-red-500/50 text-red-400 p-3 rounded-xl text-center text-sm"></div>
+            
+            <!-- Demo Mode Notice -->
+            <div class="mt-6 bg-yellow-500/10 border border-yellow-500/30 p-4 rounded-xl">
+                <p class="text-sm text-yellow-300 text-center">
+                    ⚠️ Demo Mode: Click login with any credentials to see the panel
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Admin Dashboard -->
+    <div id="adminDashboard" class="hidden">
+        <!-- Header -->
+        <header class="bg-gray-800 border-b border-gray-700 px-6 py-4">
+            <div class="flex justify-between items-center">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 bg-gradient-to-br from-pink-500 to-purple-600 rounded-lg flex items-center justify-center text-xl font-bold">M</div>
+                    <div>
+                        <h1 class="font-bold">Million Logo Admin</h1>
+                        <p class="text-sm text-gray-400">Manage orders and cells</p>
+                    </div>
+                </div>
+                <div class="flex items-center gap-4">
+                    <a href="index.html" target="_blank" class="bg-gray-700 px-4 py-2 rounded-lg hover:bg-gray-600 transition">
+                        🌐 View Site
+                    </a>
+                    <button onclick="logout()" class="bg-red-500/20 text-red-400 px-4 py-2 rounded-lg hover:bg-red-500/30 transition">
+                        Logout
+                    </button>
+                </div>
+            </div>
+        </header>
+
+        <!-- Stats -->
+        <div class="p-6">
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+                <div class="bg-gray-800 p-6 rounded-xl border border-gray-700">
+                    <div class="text-3xl font-bold text-yellow-400" id="statPending">0</div>
+                    <div class="text-gray-400">Pending Orders</div>
+                </div>
+                <div class="bg-gray-800 p-6 rounded-xl border border-gray-700">
+                    <div class="text-3xl font-bold text-green-400" id="statApproved">0</div>
+                    <div class="text-gray-400">Approved</div>
+                </div>
+                <div class="bg-gray-800 p-6 rounded-xl border border-gray-700">
+                    <div class="text-3xl font-bold text-blue-400" id="statActive">0</div>
+                    <div class="text-gray-400">Active (with logo)</div>
+                </div>
+                <div class="bg-gray-800 p-6 rounded-xl border border-gray-700">
+                    <div class="text-3xl font-bold text-pink-400" id="statRevenue">0</div>
+                    <div class="text-gray-400">Total Revenue (JOD)</div>
+                </div>
+            </div>
+
+            <!-- Tabs -->
+            <div class="flex gap-2 mb-6 overflow-x-auto">
+                <button onclick="filterOrders('all')" class="tab-btn bg-pink-500 px-6 py-2 rounded-lg font-bold whitespace-nowrap" data-tab="all">
+                    All Orders
+                </button>
+                <button onclick="filterOrders('pending')" class="tab-btn bg-gray-700 px-6 py-2 rounded-lg font-bold whitespace-nowrap" data-tab="pending">
+                    ⏳ Pending
+                </button>
+                <button onclick="filterOrders('approved')" class="tab-btn bg-gray-700 px-6 py-2 rounded-lg font-bold whitespace-nowrap" data-tab="approved">
+                    ✓ Approved
+                </button>
+                <button onclick="filterOrders('active')" class="tab-btn bg-gray-700 px-6 py-2 rounded-lg font-bold whitespace-nowrap" data-tab="active">
+                    🎨 Active
+                </button>
+                <button onclick="filterOrders('rejected')" class="tab-btn bg-gray-700 px-6 py-2 rounded-lg font-bold whitespace-nowrap" data-tab="rejected">
+                    ✗ Rejected
+                </button>
+            </div>
+
+            <!-- Orders Table -->
+            <div class="bg-gray-800 rounded-xl border border-gray-700 overflow-hidden">
+                <div class="overflow-x-auto">
+                    <table class="w-full">
+                        <thead class="bg-gray-700">
+                            <tr>
+                                <th class="text-left p-4">Order ID</th>
+                                <th class="text-left p-4">Customer</th>
+                                <th class="text-left p-4">Cells</th>
+                                <th class="text-left p-4">Amount</th>
+                                <th class="text-left p-4">Status</th>
+                                <th class="text-left p-4">Date</th>
+                                <th class="text-left p-4">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="ordersTable">
+                            <!-- Orders will be loaded here -->
+                        </tbody>
+                    </table>
+                </div>
+                
+                <div id="noOrders" class="hidden p-12 text-center text-gray-500">
+                    <div class="text-4xl mb-2">📭</div>
+                    <p>No orders found</p>
+                </div>
+                
+                <div id="loadingOrders" class="p-12 flex justify-center">
+                    <div class="loading-spinner"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Order Details Modal -->
+    <div id="orderModal" class="fixed inset-0 bg-black/80 z-50 hidden items-center justify-center p-4 overflow-y-auto">
+        <div class="bg-gray-900 rounded-2xl max-w-2xl w-full p-6 border border-gray-700 relative my-8">
+            <button onclick="closeOrderModal()" class="absolute top-4 right-4 text-gray-400 hover:text-white text-2xl">&times;</button>
+            
+            <h2 class="text-2xl font-bold mb-6">Order Details</h2>
+            
+            <div id="orderDetails" class="space-y-6">
+                <!-- Will be populated -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast -->
+    <div id="toast" class="fixed bottom-4 right-4 bg-green-600 text-white px-6 py-3 rounded-xl shadow-lg transform translate-y-20 opacity-0 transition-all duration-300 z-50">
+        <span id="toastMessage">Success!</span>
+    </div>
+
+    <script>
+        // ============ FIREBASE CONFIGURATION ============
+        const firebaseConfig = {
+            apiKey: "AIzaSyBiIITaYLK6P4soMF0ThGcGRY3LQ9dQDY4",
+            authDomain: "million-logo-page.firebaseapp.com",
+            projectId: "million-logo-page",
+            storageBucket: "million-logo-page.firebasestorage.app",
+            messagingSenderId: "224485393689",
+            appId: "1:224485393689:web:85fa9f811071995cbef188",
+            measurementId: "G-TR1VSBG8LT"
+        };
+
+        let db, storage, auth;
+        let isFirebaseReady = false;
+
+        try {
+            firebase.initializeApp(firebaseConfig);
+            db = firebase.firestore();
+            storage = firebase.storage();
+            auth = firebase.auth();
+            isFirebaseReady = true;
+            console.log("Firebase initialized");
+        } catch (e) {
+            console.log("Firebase not configured - running in demo mode");
+        }
+
+        // ============ DEMO DATA ============
+        const demoOrders = [
+            {
+                orderId: 'ORD-ABC123',
+                name: 'Horizon Tech Co.',
+                email: 'info@horizontech.com',
+                phone: '+962791234567',
+                url: 'https://horizontech.com',
+                story: 'We want to be part of Arabic digital history. Our company builds innovative solutions.',
+                cellCount: 4,
+                cells: [45, 46, 145, 146],
+                totalAmount: 4,
+                status: 'pending',
+                createdAt: new Date('2024-01-15T10:30:00'),
+                proofUrl: 'https://via.placeholder.com/400x300?text=Payment+Proof'
+            },
+            {
+                orderId: 'ORD-DEF456',
+                name: 'Mohammad Ahmad',
+                email: 'mohammad@email.com',
+                phone: '+962787654321',
+                story: 'A gift for my startup launch!',
+                cellCount: 1,
+                cells: [500],
+                totalAmount: 1,
+                status: 'approved',
+                createdAt: new Date('2024-01-14T15:45:00'),
+                proofUrl: 'https://via.placeholder.com/400x300?text=Payment+Proof'
+            },
+            {
+                orderId: 'ORD-GHI789',
+                name: 'Al-Karam Restaurant',
+                email: 'alkaram@email.com',
+                phone: '+962799999999',
+                url: 'https://alkaramrest.com',
+                story: 'Best shawarma in Amman!',
+                cellCount: 1,
+                cells: [1234],
+                totalAmount: 1,
+                status: 'active',
+                createdAt: new Date('2024-01-13T09:00:00'),
+                proofUrl: 'https://via.placeholder.com/400x300?text=Payment+Proof',
+                logoUrl: 'https://via.placeholder.com/100x100?text=Logo'
+            },
+            {
+                orderId: 'ORD-JKL012',
+                name: 'Test Company',
+                email: 'test@test.com',
+                cellCount: 2,
+                cells: [100, 101],
+                totalAmount: 2,
+                status: 'rejected',
+                createdAt: new Date('2024-01-12T14:20:00'),
+                proofUrl: 'https://via.placeholder.com/400x300?text=Fake+Proof',
+                rejectionReason: 'Payment proof appears to be fake'
+            }
+        ];
+
+        let allOrders = [];
+        let currentFilter = 'all';
+
+        // ============ AUTH ============
+        function login() {
+            const email = document.getElementById('adminEmail').value;
+            const password = document.getElementById('adminPassword').value;
+            const btn = document.getElementById('loginBtn');
+            const errorDiv = document.getElementById('loginError');
+
+            btn.innerHTML = '<div class="loading-spinner mx-auto" style="width:24px;height:24px;border-width:2px;"></div>';
+
+            if (isFirebaseReady && auth) {
+                auth.signInWithEmailAndPassword(email, password)
+                    .then(() => {
+                        showDashboard();
+                    })
+                    .catch(error => {
+                        errorDiv.textContent = error.message;
+                        errorDiv.classList.remove('hidden');
+                        btn.innerHTML = 'Login';
+                    });
+            } else {
+                // Demo mode - just show dashboard
+                setTimeout(() => {
+                    showDashboard();
+                    btn.innerHTML = 'Login';
+                }, 500);
+            }
+        }
+
+        function logout() {
+            if (auth) {
+                auth.signOut();
+            }
+            document.getElementById('loginScreen').classList.remove('hidden');
+            document.getElementById('adminDashboard').classList.add('hidden');
+        }
+
+        function showDashboard() {
+            document.getElementById('loginScreen').classList.add('hidden');
+            document.getElementById('adminDashboard').classList.remove('hidden');
+            loadOrders();
+        }
+
+        // ============ ORDERS ============
+        async function loadOrders() {
+            const table = document.getElementById('ordersTable');
+            const loading = document.getElementById('loadingOrders');
+            const noOrders = document.getElementById('noOrders');
+
+            if (isFirebaseReady && db) {
+                try {
+                    const snapshot = await db.collection('orders').orderBy('createdAt', 'desc').get();
+                    allOrders = snapshot.docs.map(doc => ({
+                        ...doc.data(),
+                        createdAt: doc.data().createdAt?.toDate() || new Date()
+                    }));
+                } catch (error) {
+                    console.error('Error loading orders:', error);
+                    allOrders = demoOrders;
+                }
+            } else {
+                // Demo mode
+                allOrders = demoOrders;
+            }
+
+            loading.classList.add('hidden');
+            updateStats();
+            renderOrders();
+        }
+
+        function updateStats() {
+            const pending = allOrders.filter(o => o.status === 'pending').length;
+            const approved = allOrders.filter(o => o.status === 'approved').length;
+            const active = allOrders.filter(o => o.status === 'active').length;
+            const revenue = allOrders
+                .filter(o => ['approved', 'active'].includes(o.status))
+                .reduce((sum, o) => sum + (o.totalAmount || 0), 0);
+
+            document.getElementById('statPending').textContent = pending;
+            document.getElementById('statApproved').textContent = approved;
+            document.getElementById('statActive').textContent = active;
+            document.getElementById('statRevenue').textContent = revenue;
+        }
+
+        function filterOrders(filter) {
+            currentFilter = filter;
+            
+            // Update tabs
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.classList.remove('bg-pink-500');
+                btn.classList.add('bg-gray-700');
+            });
+            document.querySelector(`[data-tab="${filter}"]`).classList.remove('bg-gray-700');
+            document.querySelector(`[data-tab="${filter}"]`).classList.add('bg-pink-500');
+            
+            renderOrders();
+        }
+
+        function renderOrders() {
+            const table = document.getElementById('ordersTable');
+            const noOrders = document.getElementById('noOrders');
+            
+            let orders = allOrders;
+            if (currentFilter !== 'all') {
+                orders = allOrders.filter(o => o.status === currentFilter);
+            }
+
+            if (orders.length === 0) {
+                table.innerHTML = '';
+                noOrders.classList.remove('hidden');
+                return;
+            }
+
+            noOrders.classList.add('hidden');
+            
+            table.innerHTML = orders.map(order => `
+                <tr class="border-t border-gray-700 hover:bg-gray-700/50">
+                    <td class="p-4">
+                        <code class="text-pink-400">${order.orderId}</code>
+                    </td>
+                    <td class="p-4">
+                        <div class="font-bold">${order.name}</div>
+                        <div class="text-sm text-gray-400">${order.email}</div>
+                    </td>
+                    <td class="p-4">
+                        <span class="bg-gray-700 px-2 py-1 rounded text-sm">${order.cellCount} cells</span>
+                    </td>
+                    <td class="p-4 font-bold">${order.totalAmount} JOD</td>
+                    <td class="p-4">
+                        <span class="status-${order.status} px-3 py-1 rounded-full text-sm font-bold capitalize">
+                            ${order.status}
+                        </span>
+                    </td>
+                    <td class="p-4 text-gray-400 text-sm">
+                        ${formatDate(order.createdAt)}
+                    </td>
+                    <td class="p-4">
+                        <div class="flex gap-2">
+                            <button onclick="viewOrder('${order.orderId}')" class="bg-gray-700 px-3 py-1 rounded hover:bg-gray-600 text-sm">
+                                View
+                            </button>
+                            ${order.status === 'pending' ? `
+                                <button onclick="approveOrder('${order.orderId}')" class="bg-green-600 px-3 py-1 rounded hover:bg-green-700 text-sm">
+                                    ✓
+                                </button>
+                                <button onclick="rejectOrder('${order.orderId}')" class="bg-red-600 px-3 py-1 rounded hover:bg-red-700 text-sm">
+                                    ✗
+                                </button>
+                            ` : ''}
+                        </div>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function formatDate(date) {
+            if (!date) return 'N/A';
+            return new Date(date).toLocaleDateString('en-US', {
+                year: 'numeric',
+                month: 'short',
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+        }
+
+        function viewOrder(orderId) {
+            const order = allOrders.find(o => o.orderId === orderId);
+            if (!order) return;
+
+            const modal = document.getElementById('orderModal');
+            const details = document.getElementById('orderDetails');
+
+            details.innerHTML = `
+                <div class="grid md:grid-cols-2 gap-6">
+                    <div>
+                        <h3 class="font-bold text-lg mb-4">Customer Info</h3>
+                        <div class="space-y-3">
+                            <div class="bg-gray-800 p-3 rounded-lg">
+                                <div class="text-sm text-gray-400">Name</div>
+                                <div class="font-bold">${order.name}</div>
+                            </div>
+                            <div class="bg-gray-800 p-3 rounded-lg">
+                                <div class="text-sm text-gray-400">Email</div>
+                                <div>${order.email}</div>
+                            </div>
+                            <div class="bg-gray-800 p-3 rounded-lg">
+                                <div class="text-sm text-gray-400">Phone</div>
+                                <div>${order.phone || 'N/A'}</div>
+                            </div>
+                            <div class="bg-gray-800 p-3 rounded-lg">
+                                <div class="text-sm text-gray-400">Website</div>
+                                <div>${order.url ? `<a href="${order.url}" target="_blank" class="text-pink-400 hover:underline">${order.url}</a>` : 'N/A'}</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div>
+                        <h3 class="font-bold text-lg mb-4">Order Info</h3>
+                        <div class="space-y-3">
+                            <div class="bg-gray-800 p-3 rounded-lg">
+                                <div class="text-sm text-gray-400">Order ID</div>
+                                <div class="font-mono text-pink-400">${order.orderId}</div>
+                            </div>
+                            <div class="bg-gray-800 p-3 rounded-lg">
+                                <div class="text-sm text-gray-400">Cells</div>
+                                <div>${order.cellCount} cells (${order.cells?.join(', ') || 'Random'})</div>
+                            </div>
+                            <div class="bg-gray-800 p-3 rounded-lg">
+                                <div class="text-sm text-gray-400">Amount</div>
+                                <div class="text-xl font-bold text-green-400">${order.totalAmount} JOD</div>
+                            </div>
+                            <div class="bg-gray-800 p-3 rounded-lg">
+                                <div class="text-sm text-gray-400">Status</div>
+                                <div><span class="status-${order.status} px-3 py-1 rounded-full text-sm font-bold capitalize">${order.status}</span></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                ${order.story ? `
+                <div class="bg-gray-800 p-4 rounded-lg">
+                    <div class="text-sm text-gray-400 mb-2">Story</div>
+                    <div>${order.story}</div>
+                </div>
+                ` : ''}
+
+                <div class="grid md:grid-cols-2 gap-6">
+                    <div>
+                        <h3 class="font-bold text-lg mb-4">Payment Proof</h3>
+                        <img src="${order.proofUrl || 'https://via.placeholder.com/400x300?text=No+Image'}" class="w-full rounded-lg border border-gray-700">
+                    </div>
+                    ${order.logoUrl ? `
+                    <div>
+                        <h3 class="font-bold text-lg mb-4">Uploaded Logo</h3>
+                        <img src="${order.logoUrl}" class="w-32 h-32 rounded-lg border border-gray-700 object-contain bg-white">
+                    </div>
+                    ` : ''}
+                </div>
+
+                ${order.status === 'pending' ? `
+                <div class="flex gap-4">
+                    <button onclick="approveOrder('${order.orderId}'); closeOrderModal();" class="flex-1 bg-green-600 py-3 rounded-xl font-bold hover:bg-green-700 transition">
+                        ✓ Approve Order
+                    </button>
+                    <button onclick="rejectOrder('${order.orderId}'); closeOrderModal();" class="flex-1 bg-red-600 py-3 rounded-xl font-bold hover:bg-red-700 transition">
+                        ✗ Reject Order
+                    </button>
+                </div>
+                ` : ''}
+
+                ${order.status === 'rejected' && order.rejectionReason ? `
+                <div class="bg-red-500/20 border border-red-500/50 p-4 rounded-lg">
+                    <div class="text-sm text-red-400 mb-1">Rejection Reason</div>
+                    <div>${order.rejectionReason}</div>
+                </div>
+                ` : ''}
+            `;
+
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+        }
+
+        function closeOrderModal() {
+            document.getElementById('orderModal').classList.add('hidden');
+            document.getElementById('orderModal').classList.remove('flex');
+        }
+
+        async function approveOrder(orderId) {
+            const order = allOrders.find(o => o.orderId === orderId);
+            if (!order) return;
+
+            if (isFirebaseReady && db) {
+                try {
+                    await db.collection('orders').doc(orderId).update({
+                        status: 'approved',
+                        approvedAt: firebase.firestore.FieldValue.serverTimestamp()
+                    });
+                    
+                    // TODO: Send email to customer with activation code (orderId)
+                    
+                } catch (error) {
+                    console.error('Error:', error);
+                }
+            }
+
+            // Update local
+            order.status = 'approved';
+            updateStats();
+            renderOrders();
+            showToast(`✓ Order ${orderId} approved! Customer can now upload logo.`);
+        }
+
+        async function rejectOrder(orderId) {
+            const reason = prompt('Rejection reason:');
+            if (!reason) return;
+
+            const order = allOrders.find(o => o.orderId === orderId);
+            if (!order) return;
+
+            if (isFirebaseReady && db) {
+                try {
+                    await db.collection('orders').doc(orderId).update({
+                        status: 'rejected',
+                        rejectionReason: reason,
+                        rejectedAt: firebase.firestore.FieldValue.serverTimestamp()
+                    });
+                } catch (error) {
+                    console.error('Error:', error);
+                }
+            }
+
+            // Update local
+            order.status = 'rejected';
+            order.rejectionReason = reason;
+            updateStats();
+            renderOrders();
+            showToast(`Order ${orderId} rejected`);
+        }
+
+        function showToast(message) {
+            const toast = document.getElementById('toast');
+            document.getElementById('toastMessage').textContent = message;
+            toast.classList.remove('translate-y-20', 'opacity-0');
+            setTimeout(() => {
+                toast.classList.add('translate-y-20', 'opacity-0');
+            }, 4000);
+        }
+
+        // Close modal on escape
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') closeOrderModal();
+        });
+
+        document.getElementById('orderModal').addEventListener('click', (e) => {
+            if (e.target.id === 'orderModal') closeOrderModal();
+        });
+
+        // Check auth state
+        if (auth) {
+            auth.onAuthStateChanged(user => {
+                if (user) {
+                    showDashboard();
+                }
+            });
+        }
+    </script>
+</body>
+</html>
