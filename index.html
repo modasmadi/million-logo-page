@@ -10,7 +10,6 @@
     <!-- Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-storage-compat.js"></script>
     
     <style>
         :root {
@@ -563,6 +562,7 @@
                         <div id="proofPlaceholder">
                             <div class="text-4xl mb-2">📤</div>
                             <p class="text-gray-400" data-en="Click to upload payment screenshot" data-ar="اضغط لرفع صورة الحوالة">Click to upload payment screenshot</p>
+                            <p class="text-xs text-gray-500 mt-1">Max 500KB</p>
                         </div>
                     </div>
                 </div>
@@ -577,7 +577,7 @@
                 </div>
             </div>
 
-            <!-- Step 4: Confirmation & Logo Upload -->
+            <!-- Step 4: Confirmation -->
             <div id="step4" class="step-content hidden">
                 <div class="text-center">
                     <div class="text-6xl mb-4">🎉</div>
@@ -637,7 +637,7 @@
                         <div id="logoPlaceholder">
                             <div class="text-4xl mb-2">🖼️</div>
                             <p class="text-gray-400" data-en="Click to upload your logo" data-ar="اضغط لرفع شعارك">Click to upload your logo</p>
-                            <p class="text-xs text-gray-500 mt-1">PNG, JPG, GIF (max 2MB)</p>
+                            <p class="text-xs text-gray-500 mt-1">PNG, JPG, GIF (max 200KB)</p>
                         </div>
                     </div>
                 </div>
@@ -679,15 +679,14 @@
             measurementId: "G-TR1VSBG8LT"
         };
 
-        // Initialize Firebase (will work once you add real config)
-        let db, storage;
+        // Initialize Firebase
+        let db;
         try {
             firebase.initializeApp(firebaseConfig);
             db = firebase.firestore();
-            storage = firebase.storage();
-            console.log("Firebase initialized");
+            console.log("Firebase initialized successfully!");
         } catch (e) {
-            console.log("Firebase not configured yet - running in demo mode");
+            console.log("Firebase error:", e);
         }
 
         // ============ LANGUAGE SYSTEM ============
@@ -722,28 +721,112 @@
             });
         }
 
+        // ============ IMAGE COMPRESSION ============
+        function compressImage(file, maxSizeKB) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const img = new Image();
+                    img.onload = function() {
+                        const canvas = document.createElement('canvas');
+                        let width = img.width;
+                        let height = img.height;
+                        
+                        // Max dimensions
+                        const maxDim = 400;
+                        if (width > height && width > maxDim) {
+                            height = (height * maxDim) / width;
+                            width = maxDim;
+                        } else if (height > maxDim) {
+                            width = (width * maxDim) / height;
+                            height = maxDim;
+                        }
+                        
+                        canvas.width = width;
+                        canvas.height = height;
+                        
+                        const ctx = canvas.getContext('2d');
+                        ctx.drawImage(img, 0, 0, width, height);
+                        
+                        // Compress
+                        let quality = 0.8;
+                        let dataUrl = canvas.toDataURL('image/jpeg', quality);
+                        
+                        // Reduce quality if still too big
+                        while (dataUrl.length > maxSizeKB * 1024 && quality > 0.1) {
+                            quality -= 0.1;
+                            dataUrl = canvas.toDataURL('image/jpeg', quality);
+                        }
+                        
+                        resolve(dataUrl);
+                    };
+                    img.onerror = reject;
+                    img.src = e.target.result;
+                };
+                reader.onerror = reject;
+                reader.readAsDataURL(file);
+            });
+        }
+
         // ============ GRID SYSTEM ============
         let selectedCells = [];
         let soldCellsData = {};
         let pendingCellsData = {};
 
-        // Demo data for sold cells
-        const demoCells = [
-            { id: 45, name: "Horizon Tech", color: "#3B82F6", url: "https://example.com", date: "2024-01-15", story: "Part of history!" },
-            { id: 46, name: "Horizon Tech", color: "#3B82F6", url: "https://example.com", date: "2024-01-15", story: "Part of history!" },
-            { id: 145, name: "Horizon Tech", color: "#3B82F6", url: "https://example.com", date: "2024-01-15", story: "Part of history!" },
-            { id: 146, name: "Horizon Tech", color: "#3B82F6", url: "https://example.com", date: "2024-01-15", story: "Part of history!" },
-            { id: 500, name: "Mohammad", color: "#EF4444", date: "2024-01-14", story: "Birthday gift!" },
-            { id: 1234, name: "Al-Karam Restaurant", color: "#10B981", url: "https://alkaramrest.com", date: "2024-01-13" },
-        ];
+        // Load cells from Firebase
+        async function loadCellsFromDB() {
+            if (!db) return;
+            
+            try {
+                // Load active orders (with logos)
+                const activeSnapshot = await db.collection('orders')
+                    .where('status', '==', 'active')
+                    .get();
+                
+                activeSnapshot.forEach(doc => {
+                    const data = doc.data();
+                    if (data.cells && data.cells.length > 0) {
+                        data.cells.forEach(cellId => {
+                            soldCellsData[cellId] = {
+                                id: cellId,
+                                name: data.name,
+                                url: data.url,
+                                story: data.story,
+                                logoUrl: data.logoBase64,
+                                color: '#' + Math.floor(Math.random()*16777215).toString(16),
+                                date: data.createdAt?.toDate?.()?.toLocaleDateString() || 'N/A'
+                            };
+                        });
+                    }
+                });
+
+                // Load pending orders
+                const pendingSnapshot = await db.collection('orders')
+                    .where('status', 'in', ['pending', 'approved'])
+                    .get();
+                
+                pendingSnapshot.forEach(doc => {
+                    const data = doc.data();
+                    if (data.cells && data.cells.length > 0) {
+                        data.cells.forEach(cellId => {
+                            if (!soldCellsData[cellId]) {
+                                pendingCellsData[cellId] = true;
+                            }
+                        });
+                    }
+                });
+
+                generateGrid();
+            } catch (error) {
+                console.error('Error loading cells:', error);
+                generateGrid(); // Generate with demo data
+            }
+        }
 
         function generateGrid() {
             const grid = document.getElementById('pixelGrid');
             grid.innerHTML = '';
-            const totalCells = 10000;
-            
-            // Convert demo to lookup
-            demoCells.forEach(c => soldCellsData[c.id] = c);
+            const totalCells = 10000; // Demo: 10k, Real: 1M
             
             for (let i = 0; i < totalCells; i++) {
                 const cell = document.createElement('div');
@@ -752,10 +835,12 @@
                 
                 if (soldCellsData[i]) {
                     cell.classList.add('sold');
-                    cell.style.backgroundColor = soldCellsData[i].color;
                     if (soldCellsData[i].logoUrl) {
                         cell.style.backgroundImage = `url(${soldCellsData[i].logoUrl})`;
                         cell.style.backgroundSize = 'cover';
+                        cell.style.backgroundPosition = 'center';
+                    } else {
+                        cell.style.backgroundColor = soldCellsData[i].color;
                     }
                     cell.onclick = () => showCellInfo(soldCellsData[i]);
                     cell.title = soldCellsData[i].name;
@@ -798,11 +883,9 @@
                 countEl.textContent = selectedCells.length;
                 totalEl.textContent = selectedCells.length;
                 
-                // Update modal
                 document.getElementById('cellCount').value = selectedCells.length;
                 updateTotal();
                 
-                // Show selected cells in modal
                 cellsInfo.classList.remove('hidden');
                 listEl.textContent = selectedCells.sort((a,b) => a-b).join(', ');
             } else {
@@ -864,8 +947,8 @@
 
         // ============ MODAL SYSTEM ============
         let currentStep = 1;
-        let proofFile = null;
-        let logoFile = null;
+        let proofBase64 = null;
+        let logoBase64 = null;
 
         function openBuyModal() {
             document.getElementById('buyModal').classList.remove('hidden');
@@ -882,15 +965,13 @@
             document.getElementById('buyModal').classList.add('hidden');
             document.getElementById('buyModal').classList.remove('flex');
             document.body.style.overflow = '';
-            // Reset
             currentStep = 1;
-            proofFile = null;
+            proofBase64 = null;
             document.getElementById('proofPreview').classList.add('hidden');
             document.getElementById('proofPlaceholder').classList.remove('hidden');
         }
 
         function goToStep(step) {
-            // Validation
             if (step === 2) {
                 const count = parseInt(document.getElementById('cellCount').value);
                 if (count < 1) {
@@ -913,11 +994,9 @@
 
             currentStep = step;
             
-            // Hide all steps
             document.querySelectorAll('.step-content').forEach(s => s.classList.add('hidden'));
             document.getElementById(`step${step}`).classList.remove('hidden');
             
-            // Update dots
             for (let i = 1; i <= 4; i++) {
                 const dot = document.getElementById(`step${i}Dot`);
                 dot.classList.remove('active', 'completed', 'inactive');
@@ -926,7 +1005,6 @@
                 else dot.classList.add('inactive');
             }
             
-            // Update payment total
             if (step === 3) {
                 document.getElementById('paymentTotal').textContent = document.getElementById('totalPrice').textContent;
             }
@@ -945,16 +1023,22 @@
             document.getElementById('totalPrice').textContent = count;
         }
 
-        function handleProofUpload(input) {
+        async function handleProofUpload(input) {
             if (input.files && input.files[0]) {
-                proofFile = input.files[0];
-                const reader = new FileReader();
-                reader.onload = (e) => {
-                    document.getElementById('proofImage').src = e.target.result;
+                const file = input.files[0];
+                
+                try {
+                    showToast('Compressing image...');
+                    proofBase64 = await compressImage(file, 500);
+                    
+                    document.getElementById('proofImage').src = proofBase64;
                     document.getElementById('proofPreview').classList.remove('hidden');
                     document.getElementById('proofPlaceholder').classList.add('hidden');
-                };
-                reader.readAsDataURL(proofFile);
+                    showToast('✓ Image ready!');
+                } catch (error) {
+                    showToast('Error processing image');
+                    console.error(error);
+                }
             }
         }
 
@@ -966,7 +1050,7 @@
             const story = document.getElementById('buyStory').value.trim();
             const cellCount = parseInt(document.getElementById('cellCount').value);
             
-            if (!proofFile) {
+            if (!proofBase64) {
                 showToast('Please upload payment proof');
                 return;
             }
@@ -975,18 +1059,22 @@
             btn.innerHTML = '<div class="loading-spinner mx-auto"></div>';
             btn.disabled = true;
 
-            // Generate order ID
             const orderId = 'ORD-' + Date.now().toString(36).toUpperCase();
             
+            // Assign random cells if none selected
+            let cellsToAssign = [...selectedCells];
+            if (cellsToAssign.length === 0) {
+                for (let i = 0; i < cellCount; i++) {
+                    let randomCell;
+                    do {
+                        randomCell = Math.floor(Math.random() * 10000);
+                    } while (soldCellsData[randomCell] || pendingCellsData[randomCell] || cellsToAssign.includes(randomCell));
+                    cellsToAssign.push(randomCell);
+                }
+            }
+            
             try {
-                // If Firebase is configured, save to database
-                if (db && storage) {
-                    // Upload proof image
-                    const proofRef = storage.ref().child(`proofs/${orderId}_${proofFile.name}`);
-                    await proofRef.put(proofFile);
-                    const proofUrl = await proofRef.getDownloadURL();
-                    
-                    // Save order
+                if (db) {
                     await db.collection('orders').doc(orderId).set({
                         orderId,
                         name,
@@ -995,27 +1083,23 @@
                         url,
                         story,
                         cellCount,
-                        cells: selectedCells.length > 0 ? selectedCells : [],
-                        proofUrl,
+                        cells: cellsToAssign,
+                        proofBase64,
                         status: 'pending',
                         createdAt: firebase.firestore.FieldValue.serverTimestamp(),
                         totalAmount: cellCount
                     });
+                    
+                    showToast('✓ Order saved successfully!');
                 }
                 
-                // Show confirmation
                 document.getElementById('orderIdDisplay').textContent = orderId;
                 goToStep(4);
-                
-                // Clear selection
                 clearSelection();
                 
             } catch (error) {
                 console.error('Error:', error);
-                // Still show success in demo mode
-                document.getElementById('orderIdDisplay').textContent = orderId;
-                goToStep(4);
-                clearSelection();
+                showToast('Error submitting order. Please try again.');
             }
 
             btn.innerHTML = '<span data-en="Submit Order ✓" data-ar="إرسال الطلب ✓">Submit Order ✓</span>';
@@ -1027,6 +1111,12 @@
             document.getElementById('activateModal').classList.remove('hidden');
             document.getElementById('activateModal').classList.add('flex');
             document.body.style.overflow = 'hidden';
+            // Reset
+            document.getElementById('logoUploadSection').classList.add('hidden');
+            document.getElementById('logoPreview').classList.add('hidden');
+            document.getElementById('logoPlaceholder').classList.remove('hidden');
+            document.getElementById('activateBtn').innerHTML = '<span data-en="Verify Code" data-ar="تحقق من الكود">Verify Code</span>';
+            logoBase64 = null;
         }
 
         function closeActivateModal() {
@@ -1035,16 +1125,22 @@
             document.body.style.overflow = '';
         }
 
-        function handleLogoUpload(input) {
+        async function handleLogoUpload(input) {
             if (input.files && input.files[0]) {
-                logoFile = input.files[0];
-                const reader = new FileReader();
-                reader.onload = (e) => {
-                    document.getElementById('logoImage').src = e.target.result;
+                const file = input.files[0];
+                
+                try {
+                    showToast('Compressing logo...');
+                    logoBase64 = await compressImage(file, 200);
+                    
+                    document.getElementById('logoImage').src = logoBase64;
                     document.getElementById('logoPreview').classList.remove('hidden');
                     document.getElementById('logoPlaceholder').classList.add('hidden');
-                };
-                reader.readAsDataURL(logoFile);
+                    showToast('✓ Logo ready!');
+                } catch (error) {
+                    showToast('Error processing logo');
+                    console.error(error);
+                }
             }
         }
 
@@ -1060,7 +1156,7 @@
 
             // If logo section is visible, upload logo
             if (!logoSection.classList.contains('hidden')) {
-                if (!logoFile) {
+                if (!logoBase64) {
                     showToast('Please upload your logo');
                     return;
                 }
@@ -1069,29 +1165,19 @@
                 btn.disabled = true;
 
                 try {
-                    if (db && storage) {
-                        // Get order
-                        const orderDoc = await db.collection('orders').doc(code).get();
-                        if (orderDoc.exists && orderDoc.data().status === 'approved') {
-                            // Upload logo
-                            const logoRef = storage.ref().child(`logos/${code}_${logoFile.name}`);
-                            await logoRef.put(logoFile);
-                            const logoUrl = await logoRef.getDownloadURL();
-                            
-                            // Update order
-                            await db.collection('orders').doc(code).update({
-                                logoUrl,
-                                status: 'active'
-                            });
-                            
-                            showToast('🎉 Logo uploaded successfully!');
-                            closeActivateModal();
-                            generateGrid(); // Refresh grid
-                        }
-                    } else {
-                        // Demo mode
-                        showToast('🎉 Logo uploaded! (Demo mode)');
+                    if (db) {
+                        await db.collection('orders').doc(code).update({
+                            logoBase64,
+                            status: 'active'
+                        });
+                        
+                        showToast('🎉 Logo uploaded successfully!');
                         closeActivateModal();
+                        
+                        // Reload cells
+                        soldCellsData = {};
+                        pendingCellsData = {};
+                        await loadCellsFromDB();
                     }
                 } catch (error) {
                     showToast('Error uploading logo');
@@ -1112,24 +1198,23 @@
                     const orderDoc = await db.collection('orders').doc(code).get();
                     if (orderDoc.exists && orderDoc.data().status === 'approved') {
                         logoSection.classList.remove('hidden');
-                        btn.innerHTML = '<span>Upload Logo ✓</span>';
+                        btn.innerHTML = '<span data-en="Upload Logo ✓" data-ar="رفع الشعار ✓">Upload Logo ✓</span>';
                         showToast('✓ Code verified! Now upload your logo');
                     } else if (orderDoc.exists && orderDoc.data().status === 'pending') {
                         showToast('Your order is still being reviewed');
-                        btn.innerHTML = '<span>Verify Code</span>';
+                        btn.innerHTML = '<span data-en="Verify Code" data-ar="تحقق من الكود">Verify Code</span>';
+                    } else if (orderDoc.exists && orderDoc.data().status === 'active') {
+                        showToast('This order already has a logo!');
+                        btn.innerHTML = '<span data-en="Verify Code" data-ar="تحقق من الكود">Verify Code</span>';
                     } else {
                         showToast('Invalid code');
-                        btn.innerHTML = '<span>Verify Code</span>';
+                        btn.innerHTML = '<span data-en="Verify Code" data-ar="تحقق من الكود">Verify Code</span>';
                     }
-                } else {
-                    // Demo mode - show logo upload
-                    logoSection.classList.remove('hidden');
-                    btn.innerHTML = '<span>Upload Logo ✓</span>';
-                    showToast('✓ Code verified! (Demo mode)');
                 }
             } catch (error) {
                 showToast('Error verifying code');
-                btn.innerHTML = '<span>Verify Code</span>';
+                btn.innerHTML = '<span data-en="Verify Code" data-ar="تحقق من الكود">Verify Code</span>';
+                console.error(error);
             }
 
             btn.disabled = false;
@@ -1177,7 +1262,7 @@
         });
 
         // Initialize
-        generateGrid();
+        loadCellsFromDB();
     </script>
 </body>
 </html>
