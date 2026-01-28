@@ -112,6 +112,26 @@
             border-color: rgba(233, 69, 96, 0.6);
             transform: translateY(-2px);
         }
+        .line-clamp-2 {
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+        .founder-card {
+            transition: all 0.3s;
+        }
+        .founder-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 40px rgba(234, 179, 8, 0.2);
+        }
+        .founder-card.has-founder {
+            animation: founderGlow 2s ease-in-out infinite alternate;
+        }
+        @keyframes founderGlow {
+            from { box-shadow: 0 0 20px rgba(234, 179, 8, 0.3); }
+            to { box-shadow: 0 0 30px rgba(234, 179, 8, 0.5); }
+        }
     </style>
 </head>
 <body class="bg-gray-900 text-white">
@@ -137,18 +157,33 @@
     <!-- Hero Section -->
     <section class="hero-bg min-h-screen flex items-center justify-center pt-20">
         <div class="max-w-6xl mx-auto px-4 text-center">
-            <div class="mb-8">
-                <span class="bg-pink-500/20 text-pink-400 px-4 py-2 rounded-full text-sm font-bold">
-                    🚀 <span data-en="First Arabic Digital Advertising Museum" data-ar="أول متحف إعلاني رقمي عربي">First Arabic Digital Advertising Museum</span>
+            <!-- Main Badge -->
+            <div class="mb-6">
+                <span class="bg-gradient-to-r from-yellow-500/20 to-orange-500/20 text-yellow-400 px-6 py-3 rounded-full text-lg font-bold border border-yellow-500/30">
+                    🏛️ <span data-en="First Arabic Digital Advertising Museum" data-ar="أول متحف إعلاني رقمي عربي">First Arabic Digital Advertising Museum</span>
                 </span>
             </div>
-            <h1 class="text-4xl sm:text-5xl md:text-7xl font-black mb-6 leading-tight">
+            
+            <!-- Main Title -->
+            <h1 class="text-4xl sm:text-5xl md:text-7xl font-black mb-4 leading-tight">
                 <span data-en="The Million" data-ar="الصفحة">The Million</span>
                 <span class="text-transparent bg-clip-text bg-gradient-to-r from-pink-500 to-purple-500" data-en="Logo Page" data-ar="المليون شعار">Logo Page</span>
             </h1>
-            <p class="text-lg sm:text-xl md:text-2xl text-gray-300 mb-8 max-w-3xl mx-auto">
-                <span data-en="One million cells. 1 JOD per cell. Your story lives forever." data-ar="مليون خانة. دينار واحد للخانة. قصتك تعيش للأبد.">One million cells. 1 JOD per cell. Your story lives forever.</span>
-            </p>
+            
+            <!-- Tagline -->
+            <h2 class="text-xl sm:text-2xl md:text-3xl font-bold text-yellow-400 mb-6">
+                <span data-en="Your Name Lives Forever — Not Just Another Ad" data-ar="اسمك يبقى للأبد — مش مجرد إعلان">Your Name Lives Forever — Not Just Another Ad</span>
+            </h2>
+            
+            <!-- Description -->
+            <div class="max-w-3xl mx-auto mb-8">
+                <p class="text-lg sm:text-xl text-gray-300 mb-4">
+                    <span data-en="Not just an ad... Register your name in the first Arabic digital archive that preserves legacy." data-ar="مش مجرد إعلان... سجّل اسمك ضمن أول أرشيف رقمي عربي يحتفظ بالأثر.">Not just an ad... Register your name in the first Arabic digital archive that preserves legacy.</span>
+                </p>
+                <p class="text-base text-gray-400">
+                    <span data-en="Each cell represents a name, a project, a brand, or a personality. Forever." data-ar="كل خانة تمثل اسم، مشروع، علامة، أو شخصية. للأبد.">Each cell represents a name, a project, a brand, or a personality. Forever.</span>
+                </p>
+            </div>
             
             <!-- Live Counter -->
             <div class="flex flex-wrap justify-center gap-4 sm:gap-6 mb-12">
@@ -238,6 +273,49 @@
             <!-- Grid Container -->
             <div class="bg-gray-800 p-4 rounded-2xl overflow-auto max-h-[600px] border border-gray-700">
                 <div id="pixelGrid" class="flex flex-wrap" style="width: 1000px;"></div>
+            </div>
+            
+            <!-- Founding Wall Section -->
+            <div class="mt-12 bg-gradient-to-br from-yellow-900/20 to-orange-900/20 p-8 rounded-3xl border border-yellow-500/30">
+                <div class="text-center mb-8">
+                    <span class="text-4xl">🏆</span>
+                    <h3 class="text-2xl sm:text-3xl font-black mt-2 text-yellow-400">
+                        <span data-en="Founding Wall" data-ar="جدار المؤسسين">Founding Wall</span>
+                    </h3>
+                    <p class="text-gray-400 mt-2">
+                        <span data-en="The First 3 Pioneers — Legends of the Beginning" data-ar="أول 3 رواد — أساطير البداية">The First 3 Pioneers — Legends of the Beginning</span>
+                    </p>
+                </div>
+                
+                <div id="foundingWall" class="grid grid-cols-1 sm:grid-cols-3 gap-6">
+                    <!-- Founder 1 -->
+                    <div class="founder-card bg-gray-800/50 p-6 rounded-2xl border-2 border-yellow-500/50 text-center relative overflow-hidden">
+                        <div class="absolute top-2 right-2 bg-yellow-500 text-black px-2 py-1 rounded-full text-xs font-bold">🥇 #1</div>
+                        <div id="founder1Image" class="w-20 h-20 rounded-full mx-auto bg-gradient-to-br from-yellow-500 to-orange-500 flex items-center justify-center text-3xl border-4 border-yellow-400">?</div>
+                        <h4 id="founder1Name" class="font-bold text-lg mt-4 text-yellow-400" data-en="Waiting for the first pioneer..." data-ar="بانتظار أول رائد...">Waiting for the first pioneer...</h4>
+                        <p id="founder1Story" class="text-gray-400 text-sm mt-2 line-clamp-2"></p>
+                    </div>
+                    
+                    <!-- Founder 2 -->
+                    <div class="founder-card bg-gray-800/50 p-6 rounded-2xl border-2 border-gray-500/50 text-center relative overflow-hidden">
+                        <div class="absolute top-2 right-2 bg-gray-400 text-black px-2 py-1 rounded-full text-xs font-bold">🥈 #2</div>
+                        <div id="founder2Image" class="w-20 h-20 rounded-full mx-auto bg-gradient-to-br from-gray-400 to-gray-500 flex items-center justify-center text-3xl border-4 border-gray-400">?</div>
+                        <h4 id="founder2Name" class="font-bold text-lg mt-4 text-gray-300" data-en="Waiting..." data-ar="بانتظار...">Waiting...</h4>
+                        <p id="founder2Story" class="text-gray-400 text-sm mt-2 line-clamp-2"></p>
+                    </div>
+                    
+                    <!-- Founder 3 -->
+                    <div class="founder-card bg-gray-800/50 p-6 rounded-2xl border-2 border-orange-500/50 text-center relative overflow-hidden">
+                        <div class="absolute top-2 right-2 bg-orange-500 text-black px-2 py-1 rounded-full text-xs font-bold">🥉 #3</div>
+                        <div id="founder3Image" class="w-20 h-20 rounded-full mx-auto bg-gradient-to-br from-orange-500 to-orange-600 flex items-center justify-center text-3xl border-4 border-orange-400">?</div>
+                        <h4 id="founder3Name" class="font-bold text-lg mt-4 text-orange-300" data-en="Waiting..." data-ar="بانتظار...">Waiting...</h4>
+                        <p id="founder3Story" class="text-gray-400 text-sm mt-2 line-clamp-2"></p>
+                    </div>
+                </div>
+                
+                <p class="text-center text-gray-500 mt-6 text-sm">
+                    <span data-en="Be among the first 3 and your name will be immortalized here forever!" data-ar="كن من أول 3 واسمك سيُخلَّد هنا للأبد!">Be among the first 3 and your name will be immortalized here forever!</span>
+                </p>
             </div>
         </div>
     </section>
@@ -819,8 +897,57 @@
             if (e.target.id === 'viewModal') closeViewModal();
         });
 
+        // ========== Load Founding Wall ==========
+        async function loadFoundingWall() {
+            if (!db) return;
+            
+            try {
+                const snapshot = await db.collection('cells')
+                    .where('status', '==', 'active')
+                    .orderBy('createdAt', 'asc')
+                    .limit(3)
+                    .get();
+                
+                const founders = [];
+                snapshot.forEach(doc => {
+                    founders.push({ id: doc.id, ...doc.data() });
+                });
+                
+                updateFoundingWall(founders);
+            } catch (error) {
+                console.log('Founding wall will update when first cells are added');
+            }
+        }
+        
+        function updateFoundingWall(founders) {
+            for (let i = 0; i < 3; i++) {
+                const founder = founders[i];
+                const num = i + 1;
+                
+                if (founder) {
+                    // Update image
+                    const imgEl = document.getElementById(`founder${num}Image`);
+                    if (founder.imageBase64) {
+                        imgEl.innerHTML = `<img src="${founder.imageBase64}" class="w-full h-full rounded-full object-cover">`;
+                    } else {
+                        imgEl.textContent = founder.name.charAt(0).toUpperCase();
+                    }
+                    
+                    // Update name
+                    document.getElementById(`founder${num}Name`).textContent = founder.name;
+                    
+                    // Update story
+                    document.getElementById(`founder${num}Story`).textContent = founder.story || '';
+                    
+                    // Add glow effect
+                    document.querySelectorAll('.founder-card')[i].classList.add('has-founder');
+                }
+            }
+        }
+
         // Initialize
         loadCells();
+        loadFoundingWall();
     </script>
 </body>
 </html>
