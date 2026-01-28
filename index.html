@@ -321,28 +321,12 @@
                         <input type="text" id="userName" class="w-full bg-gray-800 border border-gray-700 rounded-xl px-4 py-3 focus:border-pink-500 outline-none" placeholder="John Doe or Acme Inc.">
                     </div>
 
-                    <!-- Email -->
-                    <div>
-                        <label class="block text-gray-400 mb-2 text-sm">
-                            <span data-en="Email *" data-ar="البريد الإلكتروني *">Email *</span>
-                        </label>
-                        <input type="email" id="userEmail" class="w-full bg-gray-800 border border-gray-700 rounded-xl px-4 py-3 focus:border-pink-500 outline-none" placeholder="you@email.com">
-                    </div>
-
                     <!-- Special Date -->
                     <div>
                         <label class="block text-gray-400 mb-2 text-sm">
                             <span data-en="Special Date (Birthday, Anniversary, Launch...)" data-ar="تاريخ مهم (ميلاد، ذكرى، انطلاقة...)">Special Date (Birthday, Anniversary, Launch...)</span>
                         </label>
                         <input type="date" id="specialDate" class="w-full bg-gray-800 border border-gray-700 rounded-xl px-4 py-3 focus:border-pink-500 outline-none">
-                    </div>
-
-                    <!-- Website -->
-                    <div>
-                        <label class="block text-gray-400 mb-2 text-sm">
-                            <span data-en="Website or Social Link (Optional)" data-ar="موقعك أو رابط سوشيال (اختياري)">Website or Social Link (Optional)</span>
-                        </label>
-                        <input type="url" id="userWebsite" class="w-full bg-gray-800 border border-gray-700 rounded-xl px-4 py-3 focus:border-pink-500 outline-none" placeholder="https://...">
                     </div>
 
                     <!-- Story -->
@@ -471,9 +455,9 @@
                         <div class="text-3xl font-black text-pink-400">#<span id="confirmedCellId">0</span></div>
                     </div>
 
-                    <div class="bg-blue-500/10 border border-blue-500/30 p-4 rounded-xl mt-4 text-left">
-                        <p class="text-sm text-blue-200">
-                            📧 <span data-en="We'll notify you at" data-ar="سنبلغك على">We'll notify you at</span> <strong id="confirmedEmail"></strong> <span data-en="when your cell goes live!" data-ar="عندما تظهر خانتك!">when your cell goes live!</span>
+                    <div class="bg-green-500/10 border border-green-500/30 p-4 rounded-xl mt-4">
+                        <p class="text-sm text-green-200 text-center">
+                            ✅ <span data-en="Your cell will appear once payment is verified!" data-ar="ستظهر خانتك فور التحقق من الدفع!">Your cell will appear once payment is verified!</span>
                         </p>
                     </div>
 
@@ -615,9 +599,7 @@
 
         function resetForm() {
             document.getElementById('userName').value = '';
-            document.getElementById('userEmail').value = '';
             document.getElementById('specialDate').value = '';
-            document.getElementById('userWebsite').value = '';
             document.getElementById('userStory').value = '';
             document.getElementById('uploadPlaceholder').classList.remove('hidden');
             document.getElementById('uploadPreview').classList.add('hidden');
@@ -627,15 +609,10 @@
 
         function goToPayment() {
             const name = document.getElementById('userName').value.trim();
-            const email = document.getElementById('userEmail').value.trim();
             const story = document.getElementById('userStory').value.trim();
 
             if (!name) {
                 showToast('Please enter your name');
-                return;
-            }
-            if (!email || !email.includes('@')) {
-                showToast('Please enter a valid email');
                 return;
             }
             if (!story) {
@@ -720,9 +697,7 @@
             const cellData = {
                 cellId: selectedCellId,
                 name: document.getElementById('userName').value.trim(),
-                email: document.getElementById('userEmail').value.trim(),
                 specialDate: document.getElementById('specialDate').value,
-                website: document.getElementById('userWebsite').value.trim(),
                 story: document.getElementById('userStory').value.trim(),
                 imageBase64: uploadedImageBase64,
                 status: 'pending',
@@ -736,7 +711,6 @@
                 }
                 
                 document.getElementById('confirmedCellId').textContent = selectedCellId;
-                document.getElementById('confirmedEmail').textContent = cellData.email;
                 showStep(3);
                 
                 // Reload grid
@@ -760,31 +734,25 @@
             content.innerHTML = `
                 <div class="text-center mb-6">
                     ${data.imageBase64 
-                        ? `<img src="${data.imageBase64}" class="w-24 h-24 rounded-xl mx-auto object-cover border-2 border-pink-500">`
-                        : `<div class="w-24 h-24 rounded-xl mx-auto bg-gradient-to-br from-pink-500 to-purple-600 flex items-center justify-center text-3xl">🎯</div>`
+                        ? `<img src="${data.imageBase64}" class="w-32 h-32 rounded-xl mx-auto object-cover border-2 border-pink-500">`
+                        : `<div class="w-32 h-32 rounded-xl mx-auto bg-gradient-to-br from-pink-500 to-purple-600 flex items-center justify-center text-3xl">🎯</div>`
                     }
-                    <h3 class="text-xl font-bold mt-4">${data.name || 'Anonymous'}</h3>
+                    <h3 class="text-2xl font-bold mt-4">${data.name || 'Anonymous'}</h3>
                     <p class="text-gray-400 text-sm">Cell #${cellId}</p>
                 </div>
                 
                 ${dateStr ? `
-                <div class="bg-gray-800 p-4 rounded-xl mb-4">
+                <div class="bg-gray-800 p-4 rounded-xl mb-4 text-center">
                     <div class="text-xs text-gray-400 mb-1">📅 Special Date</div>
-                    <div class="font-semibold">${dateStr}</div>
+                    <div class="font-semibold text-lg">${dateStr}</div>
                 </div>
                 ` : ''}
                 
                 ${data.story ? `
                 <div class="bg-gray-800 p-4 rounded-xl mb-4">
-                    <div class="text-xs text-gray-400 mb-1">📖 Story</div>
-                    <div class="text-sm">${data.story}</div>
+                    <div class="text-xs text-gray-400 mb-2">📖 Story</div>
+                    <div class="text-sm leading-relaxed">${data.story}</div>
                 </div>
-                ` : ''}
-                
-                ${data.website ? `
-                <a href="${data.website}" target="_blank" class="block bg-gradient-to-r from-pink-500 to-purple-600 text-center py-3 rounded-xl font-bold hover:opacity-90 transition">
-                    🔗 Visit Website
-                </a>
                 ` : ''}
             `;
             
