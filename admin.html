@@ -86,16 +86,16 @@
         <div class="p-6">
             <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
                 <div class="bg-gray-800 p-6 rounded-xl border border-gray-700">
-                    <div class="text-3xl font-bold text-yellow-400" id="statPending">0</div>
-                    <div class="text-gray-400">Pending</div>
+                    <div class="text-3xl font-bold text-blue-400" id="statTotal">0</div>
+                    <div class="text-gray-400">Total Cells</div>
                 </div>
                 <div class="bg-gray-800 p-6 rounded-xl border border-gray-700">
-                    <div class="text-3xl font-bold text-green-400" id="statActive">0</div>
-                    <div class="text-gray-400">Active</div>
+                    <div class="text-3xl font-bold text-yellow-400" id="statUnpaid">0</div>
+                    <div class="text-gray-400">⏳ Unpaid</div>
                 </div>
                 <div class="bg-gray-800 p-6 rounded-xl border border-gray-700">
-                    <div class="text-3xl font-bold text-red-400" id="statRejected">0</div>
-                    <div class="text-gray-400">Rejected</div>
+                    <div class="text-3xl font-bold text-green-400" id="statPaid">0</div>
+                    <div class="text-gray-400">💰 Paid</div>
                 </div>
                 <div class="bg-gray-800 p-6 rounded-xl border border-gray-700">
                     <div class="text-3xl font-bold text-pink-400" id="statRevenue">0</div>
@@ -104,15 +104,15 @@
             </div>
 
             <!-- Tabs -->
-            <div class="flex gap-2 mb-6">
+            <div class="flex gap-2 mb-6 flex-wrap">
                 <button onclick="filterCells('all')" class="tab-btn bg-pink-500 px-6 py-2 rounded-lg font-bold" data-tab="all">
                     All
                 </button>
-                <button onclick="filterCells('pending')" class="tab-btn bg-gray-700 px-6 py-2 rounded-lg font-bold" data-tab="pending">
-                    ⏳ Pending
+                <button onclick="filterCells('unpaid')" class="tab-btn bg-gray-700 px-6 py-2 rounded-lg font-bold" data-tab="unpaid">
+                    ⏳ Unpaid
                 </button>
-                <button onclick="filterCells('active')" class="tab-btn bg-gray-700 px-6 py-2 rounded-lg font-bold" data-tab="active">
-                    ✓ Active
+                <button onclick="filterCells('paid')" class="tab-btn bg-gray-700 px-6 py-2 rounded-lg font-bold" data-tab="paid">
+                    💰 Paid
                 </button>
             </div>
 
@@ -212,14 +212,14 @@
         }
 
         function updateStats() {
-            const pending = allCells.filter(c => c.status === 'pending').length;
-            const active = allCells.filter(c => c.status === 'active').length;
-            const rejected = allCells.filter(c => c.status === 'rejected').length;
+            const total = allCells.length;
+            const unpaid = allCells.filter(c => !c.paid).length;
+            const paid = allCells.filter(c => c.paid === true).length;
 
-            document.getElementById('statPending').textContent = pending;
-            document.getElementById('statActive').textContent = active;
-            document.getElementById('statRejected').textContent = rejected;
-            document.getElementById('statRevenue').textContent = active; // 1 JOD per cell
+            document.getElementById('statTotal').textContent = total;
+            document.getElementById('statUnpaid').textContent = unpaid;
+            document.getElementById('statPaid').textContent = paid;
+            document.getElementById('statRevenue').textContent = paid; // 1 JOD per cell
         }
 
         function filterCells(filter) {
@@ -239,7 +239,13 @@
             
             let cells = allCells;
             if (currentFilter !== 'all') {
-                cells = allCells.filter(c => c.status === currentFilter);
+                if (currentFilter === 'unpaid') {
+                    cells = allCells.filter(c => c.status === 'active' && !c.paid);
+                } else if (currentFilter === 'paid') {
+                    cells = allCells.filter(c => c.paid === true);
+                } else {
+                    cells = allCells.filter(c => c.status === currentFilter);
+                }
             }
 
             if (cells.length === 0) {
@@ -250,8 +256,15 @@
 
             noCells.classList.add('hidden');
             
-            list.innerHTML = cells.map(cell => `
-                <div class="p-4 hover:bg-gray-700/50 flex items-center gap-4">
+            const now = new Date();
+            
+            list.innerHTML = cells.map(cell => {
+                const deadline = cell.deadline ? new Date(cell.deadline) : null;
+                const isExpired = deadline && now > deadline && !cell.paid;
+                const hoursLeft = deadline ? Math.max(0, Math.round((deadline - now) / (1000 * 60 * 60))) : 0;
+                
+                return `
+                <div class="p-4 hover:bg-gray-700/50 flex items-center gap-4 ${isExpired ? 'bg-red-900/20' : ''}">
                     <div class="w-12 h-12 rounded-lg overflow-hidden flex-shrink-0">
                         ${cell.imageBase64 
                             ? `<img src="${cell.imageBase64}" class="w-full h-full object-cover">`
@@ -260,20 +273,27 @@
                     </div>
                     <div class="flex-1 min-w-0">
                         <div class="font-bold truncate">${cell.name || 'No name'}</div>
-                        <div class="text-sm text-gray-400">Cell #${cell.cellId} • ${cell.email || 'No email'}</div>
+                        <div class="text-sm text-gray-400">Cell #${cell.cellId}</div>
                     </div>
-                    <span class="status-${cell.status} px-3 py-1 rounded-full text-sm font-bold capitalize flex-shrink-0">
-                        ${cell.status}
-                    </span>
+                    <div class="flex flex-col items-end gap-1 flex-shrink-0">
+                        ${cell.paid 
+                            ? '<span class="bg-green-600 px-3 py-1 rounded-full text-sm font-bold">💰 Paid</span>'
+                            : `<span class="bg-yellow-600 px-3 py-1 rounded-full text-sm font-bold text-black">⏳ Unpaid</span>`
+                        }
+                        ${!cell.paid && deadline 
+                            ? `<span class="text-xs ${isExpired ? 'text-red-400' : 'text-gray-400'}">${isExpired ? '⚠️ Expired!' : hoursLeft + 'h left'}</span>`
+                            : ''
+                        }
+                    </div>
                     <div class="flex gap-2 flex-shrink-0">
                         <button onclick="viewCell('${cell.id}')" class="bg-gray-700 px-3 py-1 rounded hover:bg-gray-600">View</button>
-                        ${cell.status === 'pending' ? `
-                            <button onclick="approveCell('${cell.id}')" class="bg-green-600 px-3 py-1 rounded hover:bg-green-700">✓</button>
-                            <button onclick="rejectCell('${cell.id}')" class="bg-red-600 px-3 py-1 rounded hover:bg-red-700">✗</button>
+                        ${!cell.paid ? `
+                            <button onclick="markAsPaid('${cell.id}')" class="bg-green-600 px-3 py-1 rounded hover:bg-green-700" title="Mark as Paid">💰</button>
                         ` : ''}
+                        <button onclick="deleteCell('${cell.id}')" class="bg-red-600 px-3 py-1 rounded hover:bg-red-700" title="Delete">🗑️</button>
                     </div>
                 </div>
-            `).join('');
+            `}).join('');
         }
 
         // ========== Cell Actions ==========
@@ -349,6 +369,33 @@
         function closeCellModal() {
             document.getElementById('cellModal').classList.add('hidden');
             document.getElementById('cellModal').classList.remove('flex');
+        }
+
+        async function markAsPaid(id) {
+            try {
+                await db.collection('cells').doc(id).update({ paid: true });
+                const cell = allCells.find(c => c.id === id);
+                if (cell) cell.paid = true;
+                updateStats();
+                renderCells();
+                showToast('Marked as Paid! 💰');
+            } catch (error) {
+                showToast('Error updating cell');
+            }
+        }
+
+        async function deleteCell(id) {
+            if (!confirm('Are you sure you want to DELETE this cell? This cannot be undone!')) return;
+            
+            try {
+                await db.collection('cells').doc(id).delete();
+                allCells = allCells.filter(c => c.id !== id);
+                updateStats();
+                renderCells();
+                showToast('Cell deleted! 🗑️');
+            } catch (error) {
+                showToast('Error deleting cell');
+            }
         }
 
         async function approveCell(id) {
