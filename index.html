@@ -332,6 +332,21 @@
             border-color: var(--primary);
         }
         
+        .canvas-btn.active {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            border-color: var(--primary);
+            animation: pulse 1.5s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(139, 92, 246, 0.4); }
+            50% { box-shadow: 0 0 0 8px rgba(139, 92, 246, 0); }
+        }
+        
+        .select-mode-btn {
+            min-width: 80px;
+        }
+        
         .canvas-info {
             text-align: center;
             color: #9ca3af;
@@ -570,10 +585,17 @@
             
             <!-- Canvas Controls -->
             <div class="canvas-controls">
-                <button class="canvas-btn" onclick="zoomIn()">🔍+ تكبير</button>
-                <button class="canvas-btn" onclick="zoomOut()">🔍- تصغير</button>
-                <button class="canvas-btn" onclick="resetView()">🔄 إعادة</button>
+                <button class="canvas-btn" onclick="zoomIn()">🔍+</button>
+                <button class="canvas-btn" onclick="zoomOut()">🔍-</button>
+                <button class="canvas-btn" onclick="resetView()">🔄</button>
+                <button class="canvas-btn select-mode-btn" id="selectModeBtn" onclick="toggleSelectMode()">🎯 <span data-en="Select" data-ar="اختيار">Select</span></button>
+                <button class="canvas-btn" onclick="selectRandomCell()">🎲 <span data-en="Random" data-ar="عشوائي">Random</span></button>
                 <span class="zoom-display" id="zoomLevel">100%</span>
+            </div>
+            
+            <!-- Mobile Instructions -->
+            <div class="text-center mb-4 sm:hidden">
+                <p class="text-xs text-purple-400" id="mobileHint" data-en="👆 Tap 'Select' then tap a cell" data-ar="👆 اضغط 'اختيار' ثم اختر خانة">👆 Tap 'Select' then tap a cell</p>
             </div>
             
             <!-- Canvas Grid Container -->
@@ -1349,14 +1371,73 @@
         
         // Touch handlers
         let lastTouchDistance = 0;
+        let selectMode = false;
+        let touchStartTime = 0;
+        let touchStartX = 0;
+        let touchStartY = 0;
+        
+        function toggleSelectMode() {
+            selectMode = !selectMode;
+            const btn = document.getElementById('selectModeBtn');
+            const hint = document.getElementById('mobileHint');
+            
+            if (selectMode) {
+                btn.classList.add('active');
+                btn.innerHTML = '✓ <span data-en="Selecting..." data-ar="جاري الاختيار...">Selecting...</span>';
+                if (hint) hint.textContent = currentLang === 'ar' ? '👆 الآن انقر على أي خانة' : '👆 Now tap any cell';
+                // Auto zoom for easier selection
+                if (zoom < 3) {
+                    zoom = 4;
+                    constrainOffset();
+                    renderGrid();
+                }
+                showToast(currentLang === 'ar' ? 'انقر على الخانة المطلوبة' : 'Tap on the cell you want');
+            } else {
+                btn.classList.remove('active');
+                btn.innerHTML = '🎯 <span data-en="Select" data-ar="اختيار">Select</span>';
+                if (hint) hint.textContent = currentLang === 'ar' ? '👆 اضغط "اختيار" ثم اختر خانة' : '👆 Tap "Select" then tap a cell';
+            }
+        }
+        
+        function selectRandomCell() {
+            // Find a random available cell
+            let attempts = 0;
+            let randomId;
+            
+            do {
+                randomId = Math.floor(Math.random() * TOTAL_CELLS);
+                attempts++;
+            } while (cellsData[randomId.toString()]?.status === 'active' && attempts < 100);
+            
+            // Navigate to the cell
+            const col = randomId % GRID_COLS;
+            const row = Math.floor(randomId / GRID_COLS);
+            
+            zoom = 5;
+            const cellSize = BASE_CELL_SIZE * zoom;
+            offsetX = canvas.width / 2 - col * cellSize;
+            offsetY = canvas.height / 2 - row * cellSize;
+            constrainOffset();
+            renderGrid();
+            
+            // Open claim modal
+            setTimeout(() => {
+                openClaimModal(randomId);
+            }, 300);
+        }
         
         function handleTouchStart(e) {
             e.preventDefault();
+            touchStartTime = Date.now();
+            
             if (e.touches.length === 1) {
+                touchStartX = e.touches[0].clientX;
+                touchStartY = e.touches[0].clientY;
                 isDragging = true;
                 dragStartX = e.touches[0].clientX - offsetX;
                 dragStartY = e.touches[0].clientY - offsetY;
             } else if (e.touches.length === 2) {
+                isDragging = false;
                 lastTouchDistance = Math.hypot(
                     e.touches[0].clientX - e.touches[1].clientX,
                     e.touches[0].clientY - e.touches[1].clientY
@@ -1367,10 +1448,16 @@
         function handleTouchMove(e) {
             e.preventDefault();
             if (e.touches.length === 1 && isDragging) {
-                offsetX = e.touches[0].clientX - dragStartX;
-                offsetY = e.touches[0].clientY - dragStartY;
-                constrainOffset();
-                renderGrid();
+                const moveX = Math.abs(e.touches[0].clientX - touchStartX);
+                const moveY = Math.abs(e.touches[0].clientY - touchStartY);
+                
+                // Only pan if moved more than 10px (not a tap)
+                if (moveX > 10 || moveY > 10) {
+                    offsetX = e.touches[0].clientX - dragStartX;
+                    offsetY = e.touches[0].clientY - dragStartY;
+                    constrainOffset();
+                    renderGrid();
+                }
             } else if (e.touches.length === 2) {
                 const distance = Math.hypot(
                     e.touches[0].clientX - e.touches[1].clientX,
@@ -1384,7 +1471,41 @@
             }
         }
         
-        function handleTouchEnd() {
+        function handleTouchEnd(e) {
+            const touchDuration = Date.now() - touchStartTime;
+            const touch = e.changedTouches[0];
+            const moveX = Math.abs(touch.clientX - touchStartX);
+            const moveY = Math.abs(touch.clientY - touchStartY);
+            
+            // Detect tap (short touch, minimal movement)
+            if (touchDuration < 300 && moveX < 15 && moveY < 15) {
+                // It's a tap - select cell if in select mode or always on mobile
+                if (selectMode || window.innerWidth < 768) {
+                    const rect = canvas.getBoundingClientRect();
+                    const touchX = touch.clientX - rect.left;
+                    const touchY = touch.clientY - rect.top;
+                    
+                    const cellSize = BASE_CELL_SIZE * zoom;
+                    const col = Math.floor((touchX - offsetX) / cellSize);
+                    const row = Math.floor((touchY - offsetY) / cellSize);
+                    const cellId = row * GRID_COLS + col;
+                    
+                    if (col >= 0 && col < GRID_COLS && row >= 0 && row < GRID_ROWS) {
+                        const cellData = cellsData[cellId.toString()];
+                        if (cellData && cellData.status === 'active') {
+                            showCellDetails(cellData, cellId);
+                        } else {
+                            openClaimModal(cellId);
+                        }
+                        
+                        // Turn off select mode after selection
+                        if (selectMode) {
+                            toggleSelectMode();
+                        }
+                    }
+                }
+            }
+            
             isDragging = false;
         }
         
