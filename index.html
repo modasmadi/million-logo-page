@@ -2,7 +2,9 @@
 <html lang="en" dir="ltr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="mobile-web-app-capable" content="yes">
     <title>The Million Logo Page - First Arabic Digital Advertising Museum</title>
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800;900&family=Poppins:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
@@ -416,6 +418,90 @@
             border: 2px solid var(--primary);
             background: rgba(139, 92, 246, 0.2);
             pointer-events: none;
+        }
+        
+        /* Mobile Optimizations */
+        * {
+            -webkit-tap-highlight-color: transparent;
+            -webkit-touch-callout: none;
+        }
+        
+        input, textarea, button, select {
+            font-size: 16px !important; /* Prevents zoom on iOS */
+        }
+        
+        @media (max-width: 640px) {
+            .hero-bg {
+                min-height: auto;
+                padding-top: 80px;
+                padding-bottom: 40px;
+            }
+            
+            .stat-card {
+                padding: 1rem;
+                min-width: 100px;
+            }
+            
+            .stat-card .text-3xl {
+                font-size: 1.5rem;
+            }
+            
+            .canvas-container {
+                border-radius: 0.5rem;
+            }
+            
+            .mini-map {
+                width: 80px;
+                height: 80px;
+                bottom: 5px;
+                right: 5px;
+            }
+            
+            .coordinates-display {
+                font-size: 0.6rem;
+                padding: 0.15rem 0.35rem;
+            }
+            
+            .founder-card {
+                padding: 1rem;
+            }
+            
+            .founder-avatar {
+                width: 60px;
+                height: 60px;
+            }
+            
+            .glass-card {
+                border-radius: 0.75rem;
+            }
+            
+            .modal-overlay {
+                padding: 0.5rem;
+            }
+            
+            /* Fix modal on mobile */
+            #claimModal .glass-card,
+            #viewModal .glass-card {
+                max-height: 90vh;
+                overflow-y: auto;
+            }
+        }
+        
+        /* Smooth scrolling for all elements */
+        * {
+            scroll-behavior: smooth;
+        }
+        
+        /* Better touch feedback */
+        .canvas-btn:active,
+        .glow-btn:active {
+            transform: scale(0.95);
+        }
+        
+        /* Prevent text selection on buttons */
+        button, a {
+            -webkit-user-select: none;
+            user-select: none;
         }
     </style>
 </head>
