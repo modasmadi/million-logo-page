@@ -1356,6 +1356,9 @@
             
             const cellSize = BASE_CELL_SIZE * zoom;
             
+            // تحميل الصور المرئية فقط (Lazy Loading)
+            loadVisibleImages();
+            
             // Clear canvas
             ctx.fillStyle = '#0f0f1a';
             ctx.fillRect(0, 0, canvas.width, canvas.height);
@@ -1946,6 +1949,80 @@
                 img.src = e.target.result;
             };
             reader.readAsDataURL(file);
+        }
+        
+        // ═══════════════════════════════════════════════════════════
+        // نظام تحميل الصور الذكي - Lazy Loading مع أعلى جودة
+        // ═══════════════════════════════════════════════════════════
+        
+        const MAX_CACHED_IMAGES = 200; // حد أقصى للصور المحملة
+        const imageLoadQueue = []; // قائمة انتظار التحميل
+        let isLoadingImages = false;
+        
+        // تحميل الصور المرئية فقط
+        function loadVisibleImages() {
+            if (!ctx) return;
+            
+            const cellSize = BASE_CELL_SIZE * zoom;
+            const startCol = Math.max(0, Math.floor(-offsetX / cellSize));
+            const startRow = Math.max(0, Math.floor(-offsetY / cellSize));
+            const endCol = Math.min(GRID_COLS, Math.ceil((canvas.width - offsetX) / cellSize));
+            const endRow = Math.min(GRID_ROWS, Math.ceil((canvas.height - offsetY) / cellSize));
+            
+            // جمع الخانات المرئية التي تحتاج تحميل
+            const visibleCells = [];
+            for (let row = startRow; row < endRow; row++) {
+                for (let col = startCol; col < endCol; col++) {
+                    const cellId = row * GRID_COLS + col;
+                    const cellData = cellsData[cellId.toString()];
+                    
+                    if (cellData && cellData.status === 'active' && cellData.imageBase64 && !loadedImages[cellId.toString()]) {
+                        visibleCells.push({ id: cellId.toString(), data: cellData });
+                    }
+                }
+            }
+            
+            // تحميل الصور المرئية
+            visibleCells.forEach(cell => {
+                if (!loadedImages[cell.id]) {
+                    loadImageAsync(cell.id, cell.data.imageBase64);
+                }
+            });
+            
+            // تنظيف الصور غير المرئية إذا تجاوزنا الحد
+            cleanupOldImages(startCol, startRow, endCol, endRow);
+        }
+        
+        function loadImageAsync(id, base64) {
+            const img = new Image();
+            img.onload = () => {
+                loadedImages[id] = img;
+                renderGrid(); // إعادة الرسم لإظهار الصورة
+            };
+            img.src = base64;
+        }
+        
+        function cleanupOldImages(startCol, startRow, endCol, endRow) {
+            const keys = Object.keys(loadedImages);
+            if (keys.length <= MAX_CACHED_IMAGES) return;
+            
+            // حذف الصور البعيدة عن المنطقة المرئية
+            const toRemove = [];
+            keys.forEach(id => {
+                const cellId = parseInt(id);
+                const col = cellId % GRID_COLS;
+                const row = Math.floor(cellId / GRID_COLS);
+                
+                // إذا كانت الصورة بعيدة جداً
+                if (col < startCol - 50 || col > endCol + 50 || row < startRow - 50 || row > endRow + 50) {
+                    toRemove.push(id);
+                }
+            });
+            
+            // حذف أقدم الصور
+            toRemove.slice(0, toRemove.length - MAX_CACHED_IMAGES + 50).forEach(id => {
+                delete loadedImages[id];
+            });
         }
 
         function showImagePreview(src) {
