@@ -1347,9 +1347,12 @@
         function renderGrid() {
             if (!ctx) return;
             
-            // تحسين جودة الصور
+            // أعلى جودة للصور - وضوح ممتاز
             ctx.imageSmoothingEnabled = true;
             ctx.imageSmoothingQuality = 'high';
+            
+            // تحسين إضافي للوضوح
+            ctx.globalCompositeOperation = 'source-over';
             
             const cellSize = BASE_CELL_SIZE * zoom;
             
@@ -1394,12 +1397,33 @@
                         ctx.strokeRect(x, y, cellSize - 1, cellSize - 1);
                     }
                     
-                    // Highlight hovered cell
+                    // Highlight hovered cell - رسم مكبّر للوضوح
                     if (hoveredCell === cellId) {
+                        // رسم إطار مميز
                         ctx.strokeStyle = '#8b5cf6';
                         ctx.lineWidth = 2;
                         ctx.strokeRect(x, y, cellSize - 1, cellSize - 1);
                         ctx.lineWidth = 1;
+                        
+                        // إذا كانت الخانة مباعة، نرسم صورة مكبّرة فوقها
+                        if (cellData && cellData.status === 'active' && loadedImages[cellId.toString()] && zoom < 3) {
+                            const enlargedSize = cellSize * 3;
+                            const enlargedX = x - cellSize;
+                            const enlargedY = y - cellSize;
+                            
+                            // خلفية
+                            ctx.fillStyle = 'rgba(22, 22, 42, 0.95)';
+                            ctx.fillRect(enlargedX - 2, enlargedY - 2, enlargedSize + 4, enlargedSize + 4);
+                            
+                            // إطار
+                            ctx.strokeStyle = '#8b5cf6';
+                            ctx.lineWidth = 2;
+                            ctx.strokeRect(enlargedX - 2, enlargedY - 2, enlargedSize + 4, enlargedSize + 4);
+                            ctx.lineWidth = 1;
+                            
+                            // الصورة المكبّرة
+                            ctx.drawImage(loadedImages[cellId.toString()], enlargedX, enlargedY, enlargedSize, enlargedSize);
+                        }
                     }
                 }
             }
@@ -1896,8 +1920,8 @@
                     let width = img.width;
                     let height = img.height;
                     
-                    // حجم أكبر لوضوح ممتاز
-                    const maxDim = 500;
+                    // حجم كبير لوضوح ممتاز (لكن ليس كبير جداً للحفاظ على السرعة)
+                    const maxDim = 800;
                     if (width > height && width > maxDim) {
                         height = (height * maxDim) / width;
                         width = maxDim;
@@ -1910,13 +1934,13 @@
                     canvas.height = height;
                     const ctx = canvas.getContext('2d');
                     
-                    // تحسين جودة الرسم
+                    // أعلى جودة رسم
                     ctx.imageSmoothingEnabled = true;
                     ctx.imageSmoothingQuality = 'high';
                     ctx.drawImage(img, 0, 0, width, height);
                     
-                    // جودة عالية 90%
-                    uploadedImageBase64 = canvas.toDataURL('image/jpeg', 0.90);
+                    // جودة عالية جداً 95%
+                    uploadedImageBase64 = canvas.toDataURL('image/jpeg', 0.95);
                     showImagePreview(uploadedImageBase64);
                 };
                 img.src = e.target.result;
