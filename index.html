@@ -583,7 +583,7 @@
             </div>
             
             <!-- Stats -->
-            <div class="flex flex-wrap justify-center gap-4 mb-10">
+            <div class="flex flex-wrap justify-center gap-4 mb-6">
                 <div class="stat-card primary min-w-[130px]">
                     <div class="text-3xl sm:text-4xl font-black text-white" id="soldCount">0</div>
                     <div class="text-xs sm:text-sm text-purple-300" data-en="Stories Shared" data-ar="قصة مشاركة">Stories Shared</div>
@@ -596,6 +596,20 @@
                     <div class="text-3xl sm:text-4xl font-black text-white">1 <span class="text-lg text-purple-400">JOD</span></div>
                     <div class="text-xs sm:text-sm text-gray-400" data-en="Per Cell Forever" data-ar="للخانة للأبد">Per Cell Forever</div>
                 </div>
+            </div>
+            
+            <!-- Progress Bar -->
+            <div class="max-w-md mx-auto mb-10">
+                <div class="flex justify-between text-xs text-gray-400 mb-2">
+                    <span data-en="Progress" data-ar="التقدم">Progress</span>
+                    <span id="progressPercent">0%</span>
+                </div>
+                <div class="h-3 bg-white/10 rounded-full overflow-hidden">
+                    <div id="progressBar" class="h-full bg-gradient-to-r from-purple-500 to-pink-500 rounded-full transition-all duration-500" style="width: 0%"></div>
+                </div>
+                <p class="text-center text-xs text-gray-500 mt-2">
+                    <span id="soldCountSmall">0</span> / 1,000,000 <span data-en="cells sold" data-ar="خانة مباعة">cells sold</span>
+                </p>
             </div>
 
             <a href="#grid" class="inline-block glow-btn px-8 sm:px-12 py-4 sm:py-5 rounded-full font-bold text-lg sm:text-xl shadow-2xl hover:scale-105 transition-transform">
@@ -1333,6 +1347,10 @@
         function renderGrid() {
             if (!ctx) return;
             
+            // تحسين جودة الصور
+            ctx.imageSmoothingEnabled = true;
+            ctx.imageSmoothingQuality = 'high';
+            
             const cellSize = BASE_CELL_SIZE * zoom;
             
             // Clear canvas
@@ -1435,6 +1453,22 @@
             const soldCount = Object.values(cellsData).filter(c => c.status === 'active').length;
             document.getElementById('soldCount').textContent = soldCount.toLocaleString();
             document.getElementById('availableCount').textContent = (TOTAL_CELLS - soldCount).toLocaleString();
+            
+            // Update progress bar
+            const percent = (soldCount / TOTAL_CELLS) * 100;
+            const progressBar = document.getElementById('progressBar');
+            const progressPercent = document.getElementById('progressPercent');
+            const soldCountSmall = document.getElementById('soldCountSmall');
+            
+            if (progressBar) {
+                progressBar.style.width = Math.max(percent, 0.01) + '%';
+            }
+            if (progressPercent) {
+                progressPercent.textContent = percent.toFixed(4) + '%';
+            }
+            if (soldCountSmall) {
+                soldCountSmall.textContent = soldCount.toLocaleString();
+            }
         }
         
         // Mouse handlers
@@ -1862,7 +1896,8 @@
                     let width = img.width;
                     let height = img.height;
                     
-                    const maxDim = 200;
+                    // حجم أكبر لوضوح ممتاز
+                    const maxDim = 500;
                     if (width > height && width > maxDim) {
                         height = (height * maxDim) / width;
                         width = maxDim;
@@ -1874,9 +1909,14 @@
                     canvas.width = width;
                     canvas.height = height;
                     const ctx = canvas.getContext('2d');
+                    
+                    // تحسين جودة الرسم
+                    ctx.imageSmoothingEnabled = true;
+                    ctx.imageSmoothingQuality = 'high';
                     ctx.drawImage(img, 0, 0, width, height);
                     
-                    uploadedImageBase64 = canvas.toDataURL('image/jpeg', 0.7);
+                    // جودة عالية 90%
+                    uploadedImageBase64 = canvas.toDataURL('image/jpeg', 0.90);
                     showImagePreview(uploadedImageBase64);
                 };
                 img.src = e.target.result;
