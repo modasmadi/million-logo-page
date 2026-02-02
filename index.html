@@ -637,6 +637,34 @@
         </div>
     </section>
 
+    <!-- Why People Joined - Social Proof -->
+    <section class="py-16 bg-gradient-to-r from-purple-500/5 to-pink-500/5">
+        <div class="max-w-4xl mx-auto px-4">
+            <h2 class="text-xl sm:text-2xl font-bold text-center mb-8">
+                <span class="gradient-text" data-en="Why People Joined?" data-ar="ليش الناس حجزت؟">Why People Joined?</span>
+            </h2>
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                <div class="glass-card p-4 text-center hover:scale-105 transition">
+                    <span class="text-3xl mb-2 block">❤️</span>
+                    <p class="text-sm text-gray-300" data-en="Memory of someone" data-ar="ذكرى شخص عزيز">Memory of someone</p>
+                </div>
+                <div class="glass-card p-4 text-center hover:scale-105 transition">
+                    <span class="text-3xl mb-2 block">🚀</span>
+                    <p class="text-sm text-gray-300" data-en="Start of a project" data-ar="بداية مشروع">Start of a project</p>
+                </div>
+                <div class="glass-card p-4 text-center hover:scale-105 transition">
+                    <span class="text-3xl mb-2 block">🇯🇴</span>
+                    <p class="text-sm text-gray-300" data-en="Pride in identity" data-ar="فخر بالهوية">Pride in identity</p>
+                </div>
+                <div class="glass-card p-4 text-center hover:scale-105 transition">
+                    <span class="text-3xl mb-2 block">💡</span>
+                    <p class="text-sm text-gray-300" data-en="A cool idea" data-ar="فكرة حلوة">A cool idea</p>
+                </div>
+            </div>
+            <p class="text-center text-gray-500 text-sm mt-6" data-en="Join them with just 1 JOD!" data-ar="انضم إليهم بدينار واحد فقط!">Join them with just 1 JOD!</p>
+        </div>
+    </section>
+
     <!-- How It Works -->
     <section class="py-20">
         <div class="max-w-5xl mx-auto px-4">
@@ -740,6 +768,14 @@
             
             <div class="canvas-info">
                 <span data-en="🖱️ Scroll to zoom • Drag to pan • Click to select" data-ar="🖱️ مرر للتكبير • اسحب للتنقل • اضغط للاختيار">🖱️ Scroll to zoom • Drag to pan • Click to select</span>
+            </div>
+            
+            <!-- Browse Random Stories Button -->
+            <div class="text-center mt-6">
+                <button onclick="browseRandomStory()" class="glass-card px-6 py-3 hover:bg-white/10 transition inline-flex items-center gap-2">
+                    <span class="text-xl">🎲</span>
+                    <span data-en="Browse Random Stories" data-ar="تصفح قصص عشوائية">Browse Random Stories</span>
+                </button>
             </div>
             
             <!-- The First Three -->
@@ -1010,7 +1046,7 @@
                     <div class="bg-gradient-to-r from-purple-500/10 to-pink-500/10 border border-purple-500/20 p-4 sm:p-6 rounded-2xl mb-5 text-center">
                         <div class="text-xs text-gray-400 mb-1" data-en="Total Amount" data-ar="المبلغ الإجمالي">Total Amount</div>
                         <div class="text-4xl sm:text-5xl font-black gradient-text">1 JOD</div>
-                        <div class="text-xs text-gray-500 mt-1" data-en="One time payment • Forever" data-ar="دفعة واحدة • للأبد">One time payment • Forever</div>
+                        <div class="text-xs text-gray-500 mt-1" data-en="Symbolic contribution • Forever yours" data-ar="مساهمة رمزية • للأبد">Symbolic contribution • Forever yours</div>
                     </div>
 
                     <div class="bg-green-500/10 border border-green-500/20 p-3 sm:p-4 rounded-xl mb-5">
@@ -1658,6 +1694,36 @@
             }, 300);
         }
         
+        // Browse Random Story - عرض قصة عشوائية من الخانات المباعة
+        function browseRandomStory() {
+            const soldCells = Object.entries(cellsData).filter(([id, data]) => data.status === 'active');
+            
+            if (soldCells.length === 0) {
+                showToast(currentLang === 'ar' ? 'لا توجد قصص بعد! كن الأول 🚀' : 'No stories yet! Be the first 🚀');
+                return;
+            }
+            
+            // اختر قصة عشوائية
+            const randomIndex = Math.floor(Math.random() * soldCells.length);
+            const [cellId, cellData] = soldCells[randomIndex];
+            
+            // انتقل للخانة على الشبكة
+            const col = parseInt(cellId) % GRID_COLS;
+            const row = Math.floor(parseInt(cellId) / GRID_COLS);
+            
+            zoom = 5;
+            const cellSize = BASE_CELL_SIZE * zoom;
+            offsetX = canvas.width / 2 - col * cellSize;
+            offsetY = canvas.height / 2 - row * cellSize;
+            constrainOffset();
+            renderGrid();
+            
+            // اعرض تفاصيل القصة
+            setTimeout(() => {
+                showCellDetails(cellData, cellId);
+            }, 300);
+        }
+        
         function handleTouchStart(e) {
             e.preventDefault();
             touchStartTime = Date.now();
@@ -2072,7 +2138,7 @@
             btn.disabled = false;
         }
 
-        // View Cell Details
+        // View Cell Details with Likes & Comments
         function showCellDetails(data, cellId) {
             const content = document.getElementById('viewContent');
             const dateStr = data.specialDate ? new Date(data.specialDate).toLocaleDateString() : '';
@@ -2081,48 +2147,101 @@
                 ? `شاهد خانتي في الصفحة المليون شعار! 🎯` 
                 : `Check out my cell on The Million Logo Page! 🎯`;
             
+            // Get likes and comments from data or initialize
+            const likes = data.likes || 0;
+            const comments = data.comments || [];
+            const hasLiked = localStorage.getItem(`liked_${cellId}`) === 'true';
+            
             content.innerHTML = `
                 <div class="text-center">
                     ${data.imageBase64 
-                        ? `<img src="${data.imageBase64}" class="w-24 h-24 rounded-2xl mx-auto object-cover border border-white/10">`
-                        : `<div class="w-24 h-24 rounded-2xl mx-auto bg-white/5 flex items-center justify-center text-3xl">🎯</div>`
+                        ? `<img src="${data.imageBase64}" class="w-28 h-28 rounded-2xl mx-auto object-cover border-2 border-purple-500/30 shadow-lg">`
+                        : `<div class="w-28 h-28 rounded-2xl mx-auto bg-gradient-to-br from-purple-500/20 to-pink-500/20 flex items-center justify-center text-4xl">🎯</div>`
                     }
                     
-                    <h3 class="text-xl font-bold mt-3 text-white">${data.name || 'Anonymous'}</h3>
+                    <h3 class="text-xl font-bold mt-4 text-white">${data.name || 'Anonymous'}</h3>
                     <p class="text-gray-500 text-xs mt-1">Cell #${cellId.toLocaleString()}</p>
                 </div>
                 
-                <div class="mt-6 space-y-3">
+                <div class="mt-5 space-y-3">
                     ${dateStr ? `
-                    <div class="bg-white/5 p-4 rounded-xl">
-                        <div class="text-xs text-gray-500 mb-1">${currentLang === 'ar' ? 'تاريخ مهم' : 'Special Date'}</div>
+                    <div class="bg-white/5 p-3 rounded-xl">
+                        <div class="text-xs text-gray-500 mb-1">📅 ${currentLang === 'ar' ? 'تاريخ مهم' : 'Special Date'}</div>
                         <div class="text-white text-sm">${dateStr}</div>
                     </div>
                     ` : ''}
                     
                     ${data.story ? `
-                    <div class="bg-white/5 p-4 rounded-xl">
-                        <div class="text-xs text-gray-500 mb-1">${currentLang === 'ar' ? 'القصة' : 'Story'}</div>
+                    <div class="bg-white/5 p-3 rounded-xl">
+                        <div class="text-xs text-gray-500 mb-1">📖 ${currentLang === 'ar' ? 'القصة' : 'Story'}</div>
                         <div class="text-gray-300 text-sm leading-relaxed">${data.story}</div>
                     </div>
                     ` : ''}
                 </div>
                 
+                <!-- Likes & Comments Section -->
+                <div class="mt-5 pt-4 border-t border-white/10">
+                    <!-- Like Button & Stats -->
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="flex items-center gap-4">
+                            <button onclick="toggleLike('${cellId}')" id="likeBtn_${cellId}" 
+                                class="flex items-center gap-2 ${hasLiked ? 'bg-pink-500/30 text-pink-400' : 'bg-white/5 text-gray-400 hover:text-pink-400 hover:bg-pink-500/20'} px-4 py-2 rounded-full transition-all transform hover:scale-105 active:scale-95">
+                                <span class="text-lg">${hasLiked ? '❤️' : '🤍'}</span>
+                                <span id="likeCount_${cellId}" class="font-semibold">${likes}</span>
+                            </button>
+                            <div class="flex items-center gap-2 text-gray-400">
+                                <span>💬</span>
+                                <span id="commentCount_${cellId}">${comments.length}</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Comments List -->
+                    <div class="bg-white/5 rounded-xl p-3 mb-3 max-h-32 overflow-y-auto" id="commentsList_${cellId}">
+                        ${comments.length > 0 ? comments.map(c => `
+                            <div class="flex items-start gap-2 mb-2 last:mb-0">
+                                <div class="w-6 h-6 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center text-xs flex-shrink-0">${c.name ? c.name.charAt(0).toUpperCase() : '👤'}</div>
+                                <div class="flex-1 min-w-0">
+                                    <span class="text-purple-400 text-xs font-semibold">${c.name || 'زائر'}</span>
+                                    <p class="text-gray-300 text-sm break-words">${c.text}</p>
+                                </div>
+                            </div>
+                        `).join('') : `
+                            <p class="text-gray-500 text-xs text-center py-2">${currentLang === 'ar' ? 'لا توجد تعليقات بعد. كن أول من يعلّق!' : 'No comments yet. Be the first!'}</p>
+                        `}
+                    </div>
+                    
+                    <!-- Add Comment -->
+                    <div class="flex gap-2">
+                        <input type="text" id="commentName_${cellId}" 
+                            class="w-20 bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-xs text-white placeholder-gray-500 focus:border-purple-500 outline-none"
+                            placeholder="${currentLang === 'ar' ? 'اسمك' : 'Name'}">
+                        <input type="text" id="commentText_${cellId}" 
+                            class="flex-1 bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm text-white placeholder-gray-500 focus:border-purple-500 outline-none"
+                            placeholder="${currentLang === 'ar' ? 'اكتب تعليقاً...' : 'Write a comment...'}"
+                            onkeypress="if(event.key==='Enter')addComment('${cellId}')">
+                        <button onclick="addComment('${cellId}')" 
+                            class="bg-gradient-to-r from-purple-500 to-pink-500 hover:opacity-90 px-4 py-2 rounded-lg text-sm font-semibold transition transform hover:scale-105 active:scale-95">
+                            ${currentLang === 'ar' ? '↵' : '↵'}
+                        </button>
+                    </div>
+                </div>
+                
                 <!-- Share Buttons -->
-                <div class="mt-6 pt-4 border-t border-white/10">
+                <div class="mt-4 pt-4 border-t border-white/10">
                     <p class="text-xs text-gray-500 text-center mb-3">${currentLang === 'ar' ? 'شارك هذه الخانة' : 'Share this cell'}</p>
-                    <div class="flex justify-center gap-3">
+                    <div class="flex justify-center gap-2">
                         <a href="https://wa.me/?text=${encodeURIComponent(shareText + ' ' + shareUrl)}" target="_blank" 
-                           class="flex items-center gap-2 bg-green-500/20 hover:bg-green-500/30 text-green-400 px-4 py-2 rounded-lg transition text-sm">
-                            <span>📱</span> WhatsApp
+                           class="flex items-center gap-1 bg-green-500/20 hover:bg-green-500/30 text-green-400 px-3 py-2 rounded-lg transition text-xs">
+                            📱 WhatsApp
                         </a>
                         <a href="https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}&url=${encodeURIComponent(shareUrl)}" target="_blank"
-                           class="flex items-center gap-2 bg-blue-500/20 hover:bg-blue-500/30 text-blue-400 px-4 py-2 rounded-lg transition text-sm">
-                            <span>🐦</span> Twitter
+                           class="flex items-center gap-1 bg-blue-500/20 hover:bg-blue-500/30 text-blue-400 px-3 py-2 rounded-lg transition text-xs">
+                            🐦 Twitter
                         </a>
                         <button onclick="copyText('${shareUrl}')" 
-                           class="flex items-center gap-2 bg-purple-500/20 hover:bg-purple-500/30 text-purple-400 px-4 py-2 rounded-lg transition text-sm">
-                            <span>🔗</span> ${currentLang === 'ar' ? 'نسخ' : 'Copy'}
+                           class="flex items-center gap-1 bg-purple-500/20 hover:bg-purple-500/30 text-purple-400 px-3 py-2 rounded-lg transition text-xs">
+                            🔗 ${currentLang === 'ar' ? 'نسخ' : 'Copy'}
                         </button>
                     </div>
                 </div>
@@ -2130,6 +2249,102 @@
             
             document.getElementById('viewModal').classList.remove('hidden');
             document.getElementById('viewModal').classList.add('flex');
+        }
+        
+        // Toggle Like
+        async function toggleLike(cellId) {
+            const hasLiked = localStorage.getItem(`liked_${cellId}`) === 'true';
+            const likeBtn = document.getElementById(`likeBtn_${cellId}`);
+            const likeCount = document.getElementById(`likeCount_${cellId}`);
+            
+            let currentLikes = parseInt(likeCount.textContent) || 0;
+            
+            if (hasLiked) {
+                // Unlike
+                currentLikes = Math.max(0, currentLikes - 1);
+                localStorage.removeItem(`liked_${cellId}`);
+                likeBtn.classList.remove('bg-pink-500/30', 'text-pink-400');
+                likeBtn.classList.add('bg-white/5', 'text-gray-400');
+                likeBtn.querySelector('span').textContent = '🤍';
+            } else {
+                // Like
+                currentLikes += 1;
+                localStorage.setItem(`liked_${cellId}`, 'true');
+                likeBtn.classList.add('bg-pink-500/30', 'text-pink-400');
+                likeBtn.classList.remove('bg-white/5', 'text-gray-400');
+                likeBtn.querySelector('span').textContent = '❤️';
+                
+                // Animation
+                likeBtn.style.transform = 'scale(1.2)';
+                setTimeout(() => likeBtn.style.transform = 'scale(1)', 150);
+            }
+            
+            likeCount.textContent = currentLikes;
+            
+            // Update in Firebase
+            if (db && cellsData[cellId]) {
+                try {
+                    await db.collection('cells').doc(cellId).update({ likes: currentLikes });
+                    cellsData[cellId].likes = currentLikes;
+                } catch (e) { console.log('Like update:', e); }
+            }
+        }
+        
+        // Add Comment
+        async function addComment(cellId) {
+            const nameInput = document.getElementById(`commentName_${cellId}`);
+            const textInput = document.getElementById(`commentText_${cellId}`);
+            const commentsList = document.getElementById(`commentsList_${cellId}`);
+            const commentCount = document.getElementById(`commentCount_${cellId}`);
+            
+            const name = nameInput.value.trim() || (currentLang === 'ar' ? 'زائر' : 'Guest');
+            const text = textInput.value.trim();
+            
+            if (!text) {
+                showToast(currentLang === 'ar' ? 'اكتب تعليقاً' : 'Write a comment');
+                return;
+            }
+            
+            // Create comment
+            const comment = { name, text, date: new Date().toISOString() };
+            
+            // Update UI
+            const commentHtml = `
+                <div class="flex items-start gap-2 mb-2">
+                    <div class="w-6 h-6 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center text-xs flex-shrink-0">${name.charAt(0).toUpperCase()}</div>
+                    <div class="flex-1 min-w-0">
+                        <span class="text-purple-400 text-xs font-semibold">${name}</span>
+                        <p class="text-gray-300 text-sm break-words">${text}</p>
+                    </div>
+                </div>
+            `;
+            
+            // Remove "no comments" message if exists
+            if (commentsList.querySelector('.text-center')) {
+                commentsList.innerHTML = '';
+            }
+            
+            commentsList.insertAdjacentHTML('beforeend', commentHtml);
+            commentsList.scrollTop = commentsList.scrollHeight;
+            
+            // Update count
+            const currentCount = parseInt(commentCount.textContent) || 0;
+            commentCount.textContent = currentCount + 1;
+            
+            // Clear input
+            textInput.value = '';
+            
+            // Update in Firebase
+            if (db && cellsData[cellId]) {
+                try {
+                    const comments = cellsData[cellId].comments || [];
+                    comments.push(comment);
+                    await db.collection('cells').doc(cellId).update({ comments });
+                    cellsData[cellId].comments = comments;
+                } catch (e) { console.log('Comment update:', e); }
+            }
+            
+            showToast(currentLang === 'ar' ? 'تم إضافة تعليقك ❤️' : 'Comment added ❤️');
         }
 
         function closeViewModal() {
