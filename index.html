@@ -378,22 +378,100 @@
         
         .cell-tooltip {
             position: absolute;
-            background: rgba(22, 22, 42, 0.95);
-            border: 1px solid rgba(139, 92, 246, 0.3);
-            border-radius: 0.5rem;
-            padding: 0.75rem;
+            background: rgba(22, 22, 42, 0.98);
+            border: 1px solid rgba(139, 92, 246, 0.4);
+            border-radius: 1rem;
+            padding: 1rem;
             pointer-events: none;
-            z-index: 100;
-            max-width: 200px;
-            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            max-width: 260px;
+            min-width: 200px;
+            box-shadow: 0 15px 50px rgba(0, 0, 0, 0.6), 0 0 20px rgba(139, 92, 246, 0.2);
+            backdrop-filter: blur(10px);
+            animation: tooltipFade 0.2s ease;
+        }
+        
+        @keyframes tooltipFade {
+            from { opacity: 0; transform: translateY(5px) scale(0.95); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
         }
         
         .cell-tooltip img {
-            width: 60px;
-            height: 60px;
-            border-radius: 0.5rem;
+            width: 80px;
+            height: 80px;
+            border-radius: 0.75rem;
             object-fit: cover;
+            margin: 0 auto 0.75rem;
+            display: block;
+            border: 2px solid rgba(139, 92, 246, 0.3);
+        }
+        
+        .cell-tooltip .tooltip-name {
+            font-weight: 700;
+            font-size: 1rem;
+            color: white;
+            text-align: center;
+            margin-bottom: 0.25rem;
+        }
+        
+        .cell-tooltip .tooltip-cell-id {
+            font-size: 0.7rem;
+            color: #a78bfa;
+            text-align: center;
             margin-bottom: 0.5rem;
+        }
+        
+        .cell-tooltip .tooltip-date {
+            font-size: 0.75rem;
+            color: #f472b6;
+            text-align: center;
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.25rem;
+        }
+        
+        .cell-tooltip .tooltip-story {
+            font-size: 0.75rem;
+            color: #9ca3af;
+            text-align: center;
+            line-height: 1.4;
+            margin-bottom: 0.75rem;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+        
+        .cell-tooltip .tooltip-stats {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            padding-top: 0.5rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .cell-tooltip .tooltip-stat {
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+            font-size: 0.8rem;
+        }
+        
+        .cell-tooltip .tooltip-stat.likes {
+            color: #f472b6;
+        }
+        
+        .cell-tooltip .tooltip-stat.comments {
+            color: #60a5fa;
+        }
+        
+        .cell-tooltip .tooltip-hint {
+            font-size: 0.65rem;
+            color: #6b7280;
+            text-align: center;
+            margin-top: 0.5rem;
         }
         
         .mini-map {
@@ -1802,34 +1880,86 @@
             
             // Detect tap (short touch, minimal movement)
             if (touchDuration < 300 && moveX < 15 && moveY < 15) {
-                // It's a tap - select cell if in select mode or always on mobile
-                if (selectMode || window.innerWidth < 768) {
-                    const rect = canvas.getBoundingClientRect();
-                    const touchX = touch.clientX - rect.left;
-                    const touchY = touch.clientY - rect.top;
+                const rect = canvas.getBoundingClientRect();
+                const touchX = touch.clientX - rect.left;
+                const touchY = touch.clientY - rect.top;
+                
+                const cellSize = BASE_CELL_SIZE * zoom;
+                const col = Math.floor((touchX - offsetX) / cellSize);
+                const row = Math.floor((touchY - offsetY) / cellSize);
+                const cellId = row * GRID_COLS + col;
+                
+                if (col >= 0 && col < GRID_COLS && row >= 0 && row < GRID_ROWS) {
+                    const cellData = cellsData[cellId.toString()];
                     
-                    const cellSize = BASE_CELL_SIZE * zoom;
-                    const col = Math.floor((touchX - offsetX) / cellSize);
-                    const row = Math.floor((touchY - offsetY) / cellSize);
-                    const cellId = row * GRID_COLS + col;
-                    
-                    if (col >= 0 && col < GRID_COLS && row >= 0 && row < GRID_ROWS) {
-                        const cellData = cellsData[cellId.toString()];
-                        if (cellData && cellData.status === 'active') {
+                    if (cellData && cellData.status === 'active') {
+                        // If in select mode or second tap, show details
+                        if (selectMode || lastTappedCell === cellId) {
                             showCellDetails(cellData, cellId);
+                            lastTappedCell = null;
                         } else {
+                            // First tap - show tooltip
+                            showMobileTooltip(touch.clientX, touch.clientY, cellData, cellId);
+                            lastTappedCell = cellId;
+                            
+                            // Auto-hide tooltip after 3 seconds
+                            setTimeout(() => {
+                                hideTooltip();
+                                if (lastTappedCell === cellId) lastTappedCell = null;
+                            }, 3000);
+                        }
+                    } else {
+                        // Available cell - open claim modal
+                        if (selectMode || window.innerWidth < 768) {
                             openClaimModal(cellId);
                         }
-                        
-                        // Turn off select mode after selection
-                        if (selectMode) {
-                            toggleSelectMode();
-                        }
+                    }
+                    
+                    // Turn off select mode after selection
+                    if (selectMode) {
+                        toggleSelectMode();
                     }
                 }
             }
             
             isDragging = false;
+        }
+        
+        let lastTappedCell = null;
+        
+        function showMobileTooltip(x, y, data, cellId) {
+            const tooltip = document.getElementById('cellTooltip');
+            const likes = data.likes || 0;
+            const comments = data.comments || [];
+            const dateStr = data.specialDate ? new Date(data.specialDate).toLocaleDateString() : '';
+            const storyPreview = data.story ? (data.story.length > 50 ? data.story.substring(0, 50) + '...' : data.story) : '';
+            
+            tooltip.innerHTML = `
+                ${data.imageBase64 ? `<img src="${data.imageBase64}" alt="${data.name}">` : '<div style="width:80px;height:80px;margin:0 auto 0.75rem;border-radius:0.75rem;background:linear-gradient(135deg,#8b5cf6,#ec4899);display:flex;align-items:center;justify-content:center;font-size:2rem;">🎯</div>'}
+                <div class="tooltip-name">${data.name || 'Anonymous'}</div>
+                <div class="tooltip-cell-id">Cell #${cellId.toLocaleString()}</div>
+                ${dateStr ? `<div class="tooltip-date">📅 ${dateStr}</div>` : ''}
+                ${storyPreview ? `<div class="tooltip-story">"${storyPreview}"</div>` : ''}
+                <div class="tooltip-stats">
+                    <div class="tooltip-stat likes">❤️ ${likes}</div>
+                    <div class="tooltip-stat comments">💬 ${comments.length}</div>
+                </div>
+                <div class="tooltip-hint" style="color:#a78bfa;font-weight:600;">${currentLang === 'ar' ? '👆 اضغط مرة ثانية للتفاصيل' : '👆 Tap again for details'}</div>
+            `;
+            
+            // Center tooltip on mobile
+            const tooltipWidth = 240;
+            let left = x - tooltipWidth / 2;
+            let top = y - 220;
+            
+            // Keep on screen
+            if (left < 10) left = 10;
+            if (left + tooltipWidth > window.innerWidth - 10) left = window.innerWidth - tooltipWidth - 10;
+            if (top < 10) top = y + 30;
+            
+            tooltip.style.left = left + 'px';
+            tooltip.style.top = top + 'px';
+            tooltip.classList.remove('hidden');
         }
         
         function constrainOffset() {
@@ -1864,14 +1994,39 @@
         // Tooltip
         function showTooltip(x, y, data, cellId) {
             const tooltip = document.getElementById('cellTooltip');
+            const likes = data.likes || 0;
+            const comments = data.comments || [];
+            const dateStr = data.specialDate ? new Date(data.specialDate).toLocaleDateString() : '';
+            const storyPreview = data.story ? (data.story.length > 60 ? data.story.substring(0, 60) + '...' : data.story) : '';
+            
             tooltip.innerHTML = `
-                ${data.imageBase64 ? `<img src="${data.imageBase64}" alt="">` : ''}
-                <div class="font-semibold text-white text-sm">${data.name || 'Anonymous'}</div>
-                <div class="text-gray-400 text-xs">Cell #${cellId.toLocaleString()}</div>
-                ${data.story ? `<div class="text-gray-500 text-xs mt-1 line-clamp-2">${data.story}</div>` : ''}
+                ${data.imageBase64 ? `<img src="${data.imageBase64}" alt="${data.name}">` : '<div style="width:80px;height:80px;margin:0 auto 0.75rem;border-radius:0.75rem;background:linear-gradient(135deg,#8b5cf6,#ec4899);display:flex;align-items:center;justify-content:center;font-size:2rem;">🎯</div>'}
+                <div class="tooltip-name">${data.name || 'Anonymous'}</div>
+                <div class="tooltip-cell-id">Cell #${cellId.toLocaleString()}</div>
+                ${dateStr ? `<div class="tooltip-date">📅 ${dateStr}</div>` : ''}
+                ${storyPreview ? `<div class="tooltip-story">"${storyPreview}"</div>` : ''}
+                <div class="tooltip-stats">
+                    <div class="tooltip-stat likes">❤️ ${likes}</div>
+                    <div class="tooltip-stat comments">💬 ${comments.length}</div>
+                </div>
+                <div class="tooltip-hint">${currentLang === 'ar' ? 'اضغط لمشاهدة التفاصيل' : 'Click to view details'}</div>
             `;
-            tooltip.style.left = (x + 15) + 'px';
-            tooltip.style.top = (y + 15) + 'px';
+            
+            // Position tooltip smartly
+            const rect = document.getElementById('canvasContainer').getBoundingClientRect();
+            let left = x + 15;
+            let top = y + 15;
+            
+            // Adjust if tooltip goes off screen
+            if (left + 260 > window.innerWidth) {
+                left = x - 270;
+            }
+            if (top + 300 > window.innerHeight) {
+                top = y - 200;
+            }
+            
+            tooltip.style.left = left + 'px';
+            tooltip.style.top = top + 'px';
             tooltip.classList.remove('hidden');
         }
         
