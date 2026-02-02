@@ -527,12 +527,12 @@
                 <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center text-xl font-bold">M</div>
                 <span class="text-xl font-bold hidden sm:block" data-en="Million Logo" data-ar="الصفحة المليون">Million Logo</span>
             </div>
-            <div class="flex items-center gap-3">
-                <button onclick="toggleLanguage()" class="flex items-center gap-2 bg-white/5 hover:bg-white/10 px-3 py-2 rounded-lg transition text-sm border border-white/5">
-                    <span id="langIcon">🇬🇧</span>
-                    <span id="langText">EN</span>
+            <div class="flex items-center gap-2 sm:gap-3">
+                <button onclick="toggleLanguage()" class="flex items-center gap-2 bg-gradient-to-r from-purple-500/20 to-pink-500/20 hover:from-purple-500/30 hover:to-pink-500/30 px-4 sm:px-5 py-2.5 sm:py-3 rounded-xl transition-all duration-300 border border-purple-500/30 hover:border-purple-500/50 hover:scale-105 shadow-lg">
+                    <span id="langIcon" class="text-2xl sm:text-3xl">🇺🇸</span>
+                    <span id="langText" class="font-bold text-base sm:text-lg text-white">English</span>
                 </button>
-                <a href="#grid" class="glow-btn px-4 sm:px-6 py-2 rounded-full font-semibold text-sm sm:text-base">
+                <a href="#grid" class="glow-btn px-4 sm:px-6 py-2 sm:py-2.5 rounded-full font-semibold text-sm sm:text-base">
                     <span data-en="Get Your Cell" data-ar="احجز خانتك">Get Your Cell</span>
                 </a>
             </div>
@@ -1278,8 +1278,10 @@
             document.documentElement.lang = currentLang;
             document.documentElement.dir = currentLang === 'ar' ? 'rtl' : 'ltr';
             document.body.dir = currentLang === 'ar' ? 'rtl' : 'ltr';
-            document.getElementById('langIcon').textContent = currentLang === 'ar' ? '🇯🇴' : '🇬🇧';
-            document.getElementById('langText').textContent = currentLang === 'ar' ? 'ع' : 'EN';
+            
+            // Update language button with flag
+            document.getElementById('langIcon').textContent = currentLang === 'ar' ? '🇯🇴' : '🇺🇸';
+            document.getElementById('langText').textContent = currentLang === 'ar' ? 'العربية' : 'English';
             
             document.querySelectorAll('[data-en]').forEach(el => {
                 el.textContent = el.getAttribute(`data-${currentLang}`);
